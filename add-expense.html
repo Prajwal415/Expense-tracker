@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Add Expense</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Add Expense</h2>
+  <a class="link" href="dashboard.html">← Back to Dashboard</a>
+
+  <div class="card">
+    <input id="amt" type="number" placeholder="Amount (₹)">
+    <input id="cat" placeholder="Category (Food, Bills, Travel)">
+    <input id="note" placeholder="Note (optional)">
+    <button onclick="addExpense()">Save Expense</button>
+  </div>
+
+  <div class="card">
+    <h3>Recent Expenses</h3>
+    <table id="expTable" style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="text-align:left;">
+          <th style="padding:8px;border-bottom:1px solid #eee;width:6%;">Sl.</th>
+          <th style="padding:8px;border-bottom:1px solid #eee;width:36%;">Category</th>
+          <th style="padding:8px;border-bottom:1px solid #eee;width:18%;">Price (₹)</th>
+          <th style="padding:8px;border-bottom:1px solid #eee;width:20%;">Date</th>
+          <th style="padding:8px;border-bottom:1px solid #eee;width:20%;">Time</th>
+        </tr>
+      </thead>
+      <tbody id="expBody">
+        <tr><td colspan="5" style="padding:10px">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+/* expense storage in localStorage under key "expenses" */
+function loadExpenses(){
+  const arr = JSON.parse(localStorage.getItem('expenses') || '[]');
+  const tbody = document.getElementById('expBody');
+  if(!arr.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:10px">No expenses yet.</td></tr>';
+    return;
+  }
+  const rows = arr.slice().reverse().map((e, idx) => {
+    // idx 0 is latest
+    const sl = idx + 1;
+    return `<tr>
+      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${sl}</td>
+      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${escapeHtml(e.category)}</td>
+      <td style="padding:8px;border-bottom:1px solid #f1f1f1">₹${Number(e.amount).toLocaleString()}</td>
+      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${e.date}</td>
+      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${e.time}</td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
+
+function addExpense(){
+  const amount = Number(document.getElementById('amt').value);
+  const category = document.getElementById('cat').value.trim() || 'Other';
+  const note = document.getElementById('note').value.trim() || '';
+
+  if(!amount || amount <= 0){ alert('Enter a valid amount'); return; }
+
+  const d = new Date();
+  const entry = {
+    amount,
+    category,
+    note,
+    date: d.toLocaleDateString(),
+    time: d.toLocaleTimeString()
+  };
+
+  const arr = JSON.parse(localStorage.getItem('expenses') || '[]');
+  arr.push(entry);
+  localStorage.setItem('expenses', JSON.stringify(arr));
+
+  // clear inputs
+  document.getElementById('amt').value = '';
+  document.getElementById('cat').value = '';
+  document.getElementById('note').value = '';
+
+  loadExpenses();
+}
+
+/* init */
+document.addEventListener('DOMContentLoaded', () => {
+  loadExpenses();
+});
+</script>
+
+</body>
+</html>

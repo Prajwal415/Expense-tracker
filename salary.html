@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enter Salary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<script>
+if(!localStorage.getItem("user")){
+    window.location.href="auth.html";
+}
+</script>
+
+<div class="container">
+
+    <h2>Your Salary</h2>
+    <p>Enter your monthly income</p>
+
+    <div class="card">
+        <input id="salary" type="number" placeholder="Monthly Salary (₹)">
+        <button onclick="saveAndNext()">Continue</button>
+    </div>
+
+</div>
+
+<script>
+function saveAndNext(){
+    let s = document.getElementById("salary").value;
+
+    if(!s){ alert("Enter salary"); return; }
+
+    localStorage.setItem("salary", s);
+
+    window.location.href="dashboard.html";
+}
+</script>
+
+</body>
+</html>

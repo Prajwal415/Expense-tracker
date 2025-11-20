@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign In</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+    <h2>Welcome 👋</h2>
+    <p>Please login to continue</p>
+
+    <div class="card">
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="login()">Sign In</button>
+
+        <p style="margin-top:12px;">
+            New user? <span class="link" onclick="signup()">Create Account</span>
+        </p>
+    </div>
+
+</div>
+
+<script>
+function login(){
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("password").value;
+
+    if(!email || !pass){
+        alert("Enter both fields");
+        return;
+    }
+
+    localStorage.setItem("user", email);
+
+    window.location.href = "salary.html";
+}
+
+function signup(){
+    alert("Signup stored locally — you can create an account by just typing email & password.");
+}
+</script>
+
+</body>
+</html>
