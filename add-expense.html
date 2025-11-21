@@ -14,50 +14,137 @@
   }
   *{box-sizing:border-box}
   body{font-family:Inter,system-ui,Segoe UI,Arial;margin:0;background:var(--bg);color:#0b2340}
-  .wrap{max-width:1200px;margin:18px auto;padding:12px}
-  h1{margin:0 0 8px;font-size:22px}
-  a.link{color:var(--accent);text-decoration:underline}
+  .wrap{max-width:1200px;margin:18px auto;padding:clamp(10px,2vw,20px)}
+  h1{margin:0 0 8px;font-size:clamp(18px,5vw,28px)}
+  a.link{color:var(--accent);text-decoration:underline;font-size:clamp(12px,2.5vw,14px)}
+  
   input, select, textarea, button{font-family:inherit}
-  input[type=number], input[list], select, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #e6e9ef;margin-top:8px}
+  input[type=number], input[list], select, textarea{width:100%;padding:clamp(10px,2vw,12px);border-radius:10px;border:1px solid #e6e9ef;margin-top:8px;font-size:16px}
   textarea{min-height:60px}
-  .btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  
+  .btn{background:var(--accent);color:#fff;border:0;padding:clamp(10px,2vw,14px) clamp(12px,3vw,16px);border-radius:10px;cursor:pointer;font-weight:700;font-size:clamp(13px,2.5vw,15px);min-height:44px;display:flex;align-items:center;justify-content:center}
+  .btn:active{transform:scale(0.98)}
   .secondary{background:#eef2ff;color:#0b2340}
-  .small{color:var(--muted);font-size:13px}
-  .grid{display:grid;grid-template-columns:1fr 380px;gap:14px}
-  @media (max-width:1100px){ .grid{grid-template-columns:1fr} }
+  .small{color:var(--muted);font-size:clamp(11px,2vw,13px)}
+  
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;width:100%}
+  @media (min-width:1100px){ .grid{grid-template-columns:1fr 380px} }
+  
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{padding:10px;text-align:left;border-bottom:1px solid #eee}
-  .muted{color:var(--muted);font-size:13px}
-  .kpi-row{display:flex;gap:10px;flex-wrap:wrap}
-  .kpi{background:#f9fbff;border-radius:10px;padding:12px;flex:1;min-width:160px}
-  .controls-col{display:flex;flex-direction:column;gap:10px}
-  .chart-card{display:flex;flex-direction:column;gap:12px}
-  .chart-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
-  .chart-holder{width:520px;height:520px;background:#fff;padding:10px;border-radius:10px;box-shadow:0 6px 18px rgba(10,20,40,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .chart-title{font-weight:700;font-size:15px;margin-bottom:8px}
-  canvas.fixed520{width:520px!important;height:520px!important}
-  @media (max-width:1150px){ .chart-holder{width:48%;} canvas.fixed520{width:100%!important;height:360px!important} }
-  @media (max-width:780px){ .chart-holder{width:100%;} canvas.fixed520{width:100%!important;height:360px!important} }
-
-  /* Card styling: ensure consistent width on mobile */
-  .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 10px 22px rgba(20,30,60,0.06);margin-bottom:14px}
-  /* On small screens, make all cards full width so they are consistent */
-  @media (max-width:1100px){
-    .card{width:100%}
-  }
-
-  .suggest-box{padding:14px;border-radius:10px;background:linear-gradient(180deg,#f7fffa,#f0fff6);border-left:6px solid #06b6d4}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:clamp(12px,2vw,14px)}
+  th,td{padding:clamp(8px,1.5vw,12px);text-align:left;border-bottom:1px solid #eee}
+  .muted{color:var(--muted);font-size:clamp(11px,2vw,13px)}
+  
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:clamp(8px,2vw,12px);width:100%}
+  .kpi{background:#f9fbff;border-radius:10px;padding:clamp(10px,2vw,14px);display:flex;flex-direction:column;justify-content:center}
+  .kpi div:first-child{font-weight:700;font-size:clamp(16px,3vw,20px);margin:4px 0}
+  
+  /* Card styling */
+  .card{background:var(--card);border-radius:var(--radius);padding:clamp(14px,3vw,18px);box-shadow:0 10px 22px rgba(20,30,60,0.06);margin-bottom:14px;width:100%}
+  
+  .suggest-box{padding:clamp(12px,2vw,16px);border-radius:10px;background:linear-gradient(180deg,#f7fffa,#f0fff6);border-left:6px solid #06b6d4}
   .suggest-title{display:flex;align-items:center;gap:10px}
   .suggest-title .dot{width:12px;height:12px;border-radius:50%;background:#06b6d4}
-  .suggest-content{font-size:15px;line-height:1.45;color:#0b2340;margin-top:8px}
-  .suggest-tips{margin-top:8px;font-size:13px;color:var(--muted)}
+  .suggest-content{font-size:clamp(13px,2.5vw,16px);line-height:1.45;color:#0b2340;margin-top:8px}
+  .suggest-tips{margin-top:8px;font-size:clamp(11px,2vw,13px);color:var(--muted)}
   .danger-suggest{background:linear-gradient(180deg,#fff5f5,#fff1f1);border-left:6px solid #ff6b6b}
-  .delete-row{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-bottom:6px}
-  .quick-grid{display:flex;gap:8px;flex-wrap:wrap}
-  .quick-grid button{background:#f3f6ff;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
-  .card-header{display:flex;justify-content:space-between;align-items:center}
-  .export-btn{background:#0b6e4f;color:#fff;padding:8px 10px;border-radius:8px;border:0;cursor:pointer}
+  
+  .delete-row{display:flex;gap:clamp(6px,1.5vw,10px);justify-content:flex-start;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+  .delete-row select{flex:1;min-width:150px}
+  .delete-row button{flex:1;min-width:150px;min-height:40px}
+  
+  .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:clamp(6px,1.5vw,10px);width:100%}
+  .quick-grid button{background:#f3f6ff;border:1px solid #e6e9ef;padding:clamp(8px,1.5vw,12px);border-radius:8px;cursor:pointer;font-size:clamp(12px,2vw,13px);min-height:40px;transition:all 0.2s}
+  .quick-grid button:hover{background:#eef2ff}
+  .quick-grid button:active{transform:scale(0.95)}
+  
+  .card-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:clamp(8px,2vw,12px)}
+  .export-btn{background:#0b6e4f;color:#fff;padding:clamp(8px,1.5vw,12px);border-radius:8px;border:0;cursor:pointer;font-size:clamp(12px,2vw,14px);min-height:40px;white-space:nowrap}
+  
+  /* Chart card with swipe */
+  .chart-card{display:flex;flex-direction:column;gap:clamp(12px,2vw,16px);width:100%;margin-top:20px}
+  .chart-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:clamp(8px,2vw,12px)}
+  .chart-header h3{margin:0;font-size:clamp(16px,3vw,20px)}
+  
+  /* Chart carousel - FIXED SIZE */
+  .chart-carousel{position:relative;width:100%;height:auto;overflow:hidden}
+  .chart-slides{display:flex;transition:transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);width:100%}
+  .chart-slide{min-width:100%;flex-shrink:0;padding:0}
+  
+  /* Fixed height container for mobile and desktop */
+  .chart-holder{
+    width:100%;
+    height:300px;
+    background:#fff;
+    padding:clamp(10px,2vw,16px);
+    border-radius:10px;
+    box-shadow:0 6px 18px rgba(10,20,40,0.03);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  /* Mobile: 300px height */
+  @media (max-width:480px){
+    .chart-holder{height:280px}
+  }
+  
+  /* Tablet: 350px height */
+  @media (min-width:481px) and (max-width:768px){
+    .chart-holder{height:320px}
+  }
+  
+  /* Laptop: 400px height */
+  @media (min-width:769px) and (max-width:1099px){
+    .chart-holder{height:380px}
+  }
+  
+  /* Desktop: both charts side by side */
+  @media (min-width:1100px){
+    .chart-carousel{height:auto}
+    .chart-slides{flex-wrap:wrap;gap:12px;transform:none!important}
+    .chart-slide{min-width:calc(50% - 6px)}
+    .chart-holder{height:420px}
+  }
+  
+  .chart-title{font-weight:700;font-size:clamp(13px,2.5vw,16px);margin-bottom:clamp(8px,1.5vw,12px);text-align:center;flex-shrink:0}
+  
+  canvas{width:100%!important;height:calc(100% - 30px)!important}
+  
+  /* Navigation buttons */
+  .chart-nav{display:flex;gap:clamp(8px,2vw,12px);justify-content:center;align-items:center;margin-top:clamp(12px,2vw,16px);flex-wrap:wrap}
+  .chart-nav button{background:var(--accent);color:#fff;border:0;padding:clamp(8px,1.5vw,12px) clamp(12px,2vw,16px);border-radius:8px;cursor:pointer;font-weight:600;font-size:clamp(12px,2vw,14px);min-height:40px;transition:all 0.2s}
+  .chart-nav button:hover:not(:disabled){background:#2949c0}
+  .chart-nav button:disabled{background:#ccc;cursor:not-allowed;opacity:0.6}
+  .chart-nav button:active:not(:disabled){transform:scale(0.95)}
+  
+  .chart-counter{font-size:clamp(12px,2vw,14px);color:var(--muted);font-weight:600}
+  .swipe-indicator{text-align:center;font-size:clamp(11px,2vw,13px);color:var(--muted);margin-top:8px;display:block}
+  
+  @media (min-width:1100px){
+    .swipe-indicator{display:none}
+    .chart-nav{display:none}
+  }
+  
+  .controls-col{display:flex;flex-direction:column;gap:clamp(10px,2vw,14px);width:100%}
+  .controls-col > div{flex:1}
+  
+  @media (max-width:768px){
+    .card{padding:clamp(12px,2vw,16px)}
+    .card-header{flex-direction:column;align-items:flex-start}
+    .delete-row{justify-content:flex-start}
+    .wrap{margin:12px auto}
+  }
+  
+  @media (min-width:768px) and (max-width:1099px){
+    .card{padding:16px}
+  }
+  
+  /* Helper classes */
+  label{font-size:clamp(13px,2.5vw,15px);font-weight:600;display:block;margin-top:12px}
+  label:first-child{margin-top:0}
+  h3{font-size:clamp(16px,3vw,20px);margin:0 0 clamp(6px,1.5vw,10px)}
 </style>
 </head>
 <body>
@@ -71,59 +158,56 @@
     <input id="amt" type="number" placeholder="Amount" />
 
     <label style="margin-top:8px">Category</label>
-    <!-- typeable datalist so user can type or select -->
     <input id="cat" list="catList" placeholder="Type or select category" />
     <datalist id="catList"></datalist>
 
     <label style="margin-top:8px">Note (optional)</label>
     <textarea id="note" placeholder="Note (optional)"></textarea>
 
-    <div class="row" style="margin-top:12px">
+    <div class="row" style="margin-top:14px">
       <button class="btn" id="saveBtn">Save Expense</button>
-      <button id="refreshCats" class="btn secondary" style="padding:10px 12px">Refresh Categories</button>
+      <button id="refreshCats" class="btn secondary">Refresh Categories</button>
     </div>
   </div>
 
   <div class="grid">
     <div>
+      <!-- Highest Expenses KPI -->
       <div class="card">
-        <h3 style="margin:0 0 8px">Highest Expenses</h3>
+        <h3>Highest Expenses</h3>
         <div class="kpi-row" id="kpis">
           <div class="kpi">
             <div class="small">This month</div>
-            <div style="font-weight:700;font-size:18px" id="hiThis">—</div>
+            <div id="hiThis">—</div>
             <div class="muted" id="hiThisMeta"></div>
           </div>
           <div class="kpi">
             <div class="small">Last 3 months</div>
-            <div style="font-weight:700;font-size:18px" id="hi3">—</div>
+            <div id="hi3">—</div>
             <div class="muted" id="hi3Meta"></div>
           </div>
           <div class="kpi">
             <div class="small">Last 6 months</div>
-            <div style="font-weight:700;font-size:18px" id="hi6">—</div>
+            <div id="hi6">—</div>
             <div class="muted" id="hi6Meta"></div>
           </div>
           <div class="kpi">
             <div class="small">Last 12 months</div>
-            <div style="font-weight:700;font-size:18px" id="hi12">—</div>
+            <div id="hi12">—</div>
             <div class="muted" id="hi12Meta"></div>
           </div>
         </div>
       </div>
 
-      <!-- RECENT EXPENSES card (moved here) -->
+      <!-- Recent Expenses -->
       <div class="card">
         <div class="card-header">
           <div>
-            <h3 style="margin:0">Recent Expenses</h3>
+            <h3>Recent Expenses</h3>
             <div class="small">Latest items appear at top</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="exportBtn" class="export-btn">Export CSV</button>
-          </div>
+          <button id="exportBtn" class="export-btn">📥 Export CSV</button>
         </div>
-
         <table id="expTable">
           <thead>
             <tr><th>Sl.</th><th>Category</th><th>Price (₹)</th><th>Date</th><th>Time</th></tr>
@@ -132,145 +216,285 @@
         </table>
       </div>
 
+      <!-- Category Analysis -->
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <h3 style="margin:0">Category Analysis</h3>
-          <div class="delete-row">
-            <select id="deleteCategory">
-              <option value="">-- choose to delete --</option>
-            </select>
-            <button id="deleteCatBtn" style="background:#ffebe9;color:#c53030;border-radius:8px;padding:8px;border:0">Delete Selected</button>
-          </div>
+        <h3>Category Analysis</h3>
+        
+        <div class="delete-row">
+          <select id="deleteCategory">
+            <option value="">-- choose to delete --</option>
+          </select>
+          <button id="deleteCatBtn" style="background:#ffebe9;color:#c53030;border:0;border-radius:8px;cursor:pointer;min-height:40px;font-weight:600">Delete</button>
         </div>
 
-        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap" class="controls-col">
-          <div style="flex:1;min-width:220px">
-            <div class="small">Analyze category:</div>
-            <select id="analysisCategory" style="margin-top:8px;width:100%"></select>
+        <div class="controls-col">
+          <div>
+            <label style="margin:0 0 8px">Analyze category:</label>
+            <select id="analysisCategory" style="margin-top:0"></select>
+          </div>
 
-            <div style="margin-top:10px" class="small">Range:</div>
-            <div style="margin-top:6px" class="row">
-              <label><input type="radio" name="range" value="3" checked/> 3m</label>
-              <label><input type="radio" name="range" value="6"/> 6m</label>
-              <label><input type="radio" name="range" value="12"/> 12m</label>
+          <div>
+            <label style="margin:0 0 8px">Range:</label>
+            <div class="row">
+              <label style="display:flex;align-items:center;margin:0;font-weight:normal"><input type="radio" name="range" value="3" checked style="margin-right:6px"/> 3m</label>
+              <label style="display:flex;align-items:center;margin:0;font-weight:normal"><input type="radio" name="range" value="6" style="margin-right:6px"/> 6m</label>
+              <label style="display:flex;align-items:center;margin:0;font-weight:normal"><input type="radio" name="range" value="12" style="margin-right:6px"/> 12m</label>
             </div>
+          </div>
 
-            <div style="margin-top:10px" class="small">Line data:</div>
-            <select id="lineData" style="margin-top:8px;width:100%">
+          <div>
+            <label style="margin:0 0 8px">Line data:</label>
+            <select id="lineData" style="margin-top:0">
               <option value="share">Share %</option>
               <option value="amount">Monthly amount</option>
             </select>
-
-            <div style="margin-top:10px" class="row">
-              <label style="display:flex;align-items:center;"><input id="showPie" type="checkbox" style="margin-right:6px"/> Show Pie</label>
-              <button id="showAnalysis" class="btn" style="padding:8px 10px">Show</button>
-            </div>
           </div>
 
-          <div style="flex:1;min-width:260px">
-            <div id="suggestionsArea" class="suggest-box">
-              <div class="suggest-title">
-                <div class="dot"></div>
-                <div style="font-weight:700">Personalized Suggestions</div>
-              </div>
-              <div id="suggestText" class="suggest-content">
-                Choose a category and range then press <strong>Show</strong>. Suggestions will appear here.
-              </div>
-              <div class="suggest-tips" id="suggestTips">
-                Tip: If a category is >30% of your total spending consider creating a monthly cap for it.
-              </div>
-            </div>
+          <div>
+            <label style="display:flex;align-items:center;margin:0;font-weight:normal"><input id="showPie" type="checkbox" style="margin-right:8px"/> Show Pie Chart</label>
+            <button id="showAnalysis" class="btn" style="margin-top:10px;width:100%">Show Analysis</button>
           </div>
         </div>
       </div>
-
     </div>
 
+    <!-- Right Sidebar -->
     <div>
+      <!-- Quick Category Links -->
       <div class="card">
-        <h3 style="margin:0 0 8px">Category breakdown (quick links)</h3>
+        <h3>Category breakdown</h3>
         <div class="small">Click to analyze quickly</div>
-        <div style="margin-top:10px" id="quickCats" class="quick-grid"></div>
+        <div style="margin-top:clamp(10px,2vw,14px)" id="quickCats" class="quick-grid"></div>
+      </div>
+
+      <!-- Personalized Suggestions -->
+      <div id="suggestionsArea" class="card suggest-box">
+        <div class="suggest-title">
+          <div class="dot"></div>
+          <div style="font-weight:700;font-size:clamp(14px,2.5vw,16px)">Personalized Suggestions</div>
+        </div>
+        <div id="suggestText" class="suggest-content">
+          Choose a category and range then press <strong>Show Analysis</strong>. Suggestions will appear here.
+        </div>
+        <div class="suggest-tips" id="suggestTips">
+          💡 Tip: If a category is >30% of your total spending, consider creating a monthly cap for it.
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Separate chart card (kept swipeable and not changed) -->
+  <!-- Charts Section with Swipe Navigation -->
   <div class="card chart-card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-weight:700">Charts — big view</div>
-      <div class="small">Swipe left/right or toggle to switch view on mobile</div>
+    <div class="chart-header">
+      <h3>📊 Charts</h3>
+      <div class="swipe-indicator">👈 Swipe left/right to navigate</div>
     </div>
 
-    <div class="chart-row" style="margin-top:12px;justify-content:center">
-      <div class="chart-holder">
-        <div class="chart-title" id="chartTitle">Category share (last 3 mo)</div>
-        <canvas id="lineChart" class="fixed520" width="520" height="520"></canvas>
-      </div>
+    <div class="chart-carousel" id="chartCarousel">
+      <div class="chart-slides" id="chartSlides">
+        <!-- Slide 1: Line Chart -->
+        <div class="chart-slide">
+          <div class="chart-holder">
+            <div class="chart-title" id="chartTitle">Category share (last 3 mo)</div>
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
 
-      <div class="chart-holder">
-        <div class="chart-title" id="barTitle">Totals by category (last 3 mo)</div>
-        <canvas id="barChart" class="fixed520" width="520" height="520"></canvas>
-        <canvas id="pieChart" class="fixed520" width="520" height="520" style="display:none"></canvas>
+        <!-- Slide 2: Bar/Pie Chart -->
+        <div class="chart-slide">
+          <div class="chart-holder">
+            <div class="chart-title" id="barTitle">Totals by category (last 3 mo)</div>
+            <canvas id="barChart"></canvas>
+            <canvas id="pieChart" style="display:none"></canvas>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="chart-nav">
+      <button id="prevChart" class="nav-btn" style="margin-right:auto">← Previous</button>
+      <span class="chart-counter"><span id="currentSlide">1</span> / 2</span>
+      <button id="nextChart" class="nav-btn" style="margin-left:auto">Next →</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ----------------- Utilities & storage ----------------- */
+/* ============= CHART CAROUSEL/SWIPE NAVIGATION ============= */
+let currentSlide = 0;
+const slides = 2;
+const carousel = document.getElementById('chartCarousel');
+const chartSlides = document.getElementById('chartSlides');
+const prevBtn = document.getElementById('prevChart');
+const nextBtn = document.getElementById('nextChart');
+const currentSlideSpan = document.getElementById('currentSlide');
+
+let touchStartX = 0;
+let touchEndX = 0;
+let isAnimating = false;
+
+function updateSlide() {
+  if(isAnimating) return;
+  
+  const offset = -currentSlide * 100;
+  chartSlides.style.transform = `translateX(${offset}%)`;
+  currentSlideSpan.textContent = currentSlide + 1;
+  
+  prevBtn.disabled = currentSlide === 0;
+  nextBtn.disabled = currentSlide === slides - 1;
+}
+
+function nextSlide() {
+  if(currentSlide < slides - 1) {
+    isAnimating = true;
+    currentSlide++;
+    updateSlide();
+    setTimeout(() => { isAnimating = false; }, 400);
+  }
+}
+
+function prevSlide() {
+  if(currentSlide > 0) {
+    isAnimating = true;
+    currentSlide--;
+    updateSlide();
+    setTimeout(() => { isAnimating = false; }, 400);
+  }
+}
+
+// Button click handlers
+prevBtn.addEventListener('click', prevSlide);
+nextBtn.addEventListener('click', nextSlide);
+
+// Touch swipe handlers
+carousel.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+carousel.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, false);
+
+function handleSwipe() {
+  const threshold = 50;
+  const diff = touchStartX - touchEndX;
+  
+  if(Math.abs(diff) > threshold && !isAnimating) {
+    if(diff > 0) {
+      nextSlide(); // swiped left
+    } else {
+      prevSlide(); // swiped right
+    }
+  }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowLeft') nextSlide();
+  else if(e.key === 'ArrowRight') prevSlide();
+});
+
+// Initialize slide
+updateSlide();
+
+/* ============= EXPENSE TRACKER LOGIC ============= */
 const EXP_KEY = 'expenses';
-function loadExpenses(){ try{ const r = localStorage.getItem(EXP_KEY); return r ? JSON.parse(r) : []; } catch(e){ return []; } }
-function saveExpenses(arr){ try{ localStorage.setItem(EXP_KEY, JSON.stringify(arr)); } catch(e){ console.error('Unable to save expenses', e); alert('Unable to save - localStorage error'); } }
-function addExpenseObj(obj){ const arr = loadExpenses(); arr.unshift(obj); saveExpenses(arr); }
 
-/* formatting helpers */
-function formatDateISO(dISO){ const dt = new Date(dISO); if(isNaN(dt)) return { date:'Invalid Date', time:'Invalid Date' }; return { date: dt.toLocaleDateString('en-GB'), time: dt.toLocaleTimeString('en-GB') }; }
-function monthDiff(d1,d2){ const y1=d1.getFullYear(), m1=d1.getMonth(); const y2=d2.getFullYear(), m2=d2.getMonth(); return (y2-y1)*12 + (m2-m1); }
+function loadExpenses() {
+  try {
+    const r = localStorage.getItem(EXP_KEY);
+    return r ? JSON.parse(r) : [];
+  } catch(e) {
+    return [];
+  }
+}
 
-/* default categories */
-const defaultCats = ["Food","Rent","Travel","Vehicle loan","home loan","Education","Entertainment","Miscellaneous"];
+function saveExpenses(arr) {
+  try {
+    localStorage.setItem(EXP_KEY, JSON.stringify(arr));
+  } catch(e) {
+    console.error('Unable to save expenses', e);
+    alert('Unable to save - localStorage error');
+  }
+}
 
-/* get categories aggregated */
-function getCategories(){
+function formatDateISO(dISO) {
+  const dt = new Date(dISO);
+  if(isNaN(dt)) return { date: 'Invalid Date', time: 'Invalid Date' };
+  return {
+    date: dt.toLocaleDateString('en-GB'),
+    time: dt.toLocaleTimeString('en-GB')
+  };
+}
+
+function monthDiff(d1, d2) {
+  const y1 = d1.getFullYear(), m1 = d1.getMonth();
+  const y2 = d2.getFullYear(), m2 = d2.getMonth();
+  return (y2 - y1) * 12 + (m2 - m1);
+}
+
+const defaultCats = ["Food", "Rent", "Travel", "Vehicle loan", "home loan", "Education", "Entertainment", "Miscellaneous"];
+
+function getCategories() {
   const arr = loadExpenses();
   const set = new Set(defaultCats);
-  arr.forEach(e=> set.add(e.category));
+  arr.forEach(e => set.add(e.category));
   return Array.from(set);
 }
 
-/* populate datalist + selects + quick links */
-function populateCategorySelects(){
+function populateCategorySelects() {
   const sel = document.getElementById('analysisCategory');
   const del = document.getElementById('deleteCategory');
   const quick = document.getElementById('quickCats');
   const dataList = document.getElementById('catList');
   const catInput = document.getElementById('cat');
 
-  sel.innerHTML = ''; del.innerHTML = '<option value="">-- choose to delete --</option>'; quick.innerHTML = ''; dataList.innerHTML='';
+  sel.innerHTML = '';
+  del.innerHTML = '<option value="">-- choose to delete --</option>';
+  quick.innerHTML = '';
+  dataList.innerHTML = '';
 
   const allOpt = document.createElement('option');
-  allOpt.value = '__ALL__'; allOpt.innerText = 'Analyze: All categories';
+  allOpt.value = '__ALL__';
+  allOpt.innerText = 'Analyze: All categories';
   sel.appendChild(allOpt);
 
-  getCategories().forEach(c=>{
-    const o = document.createElement('option'); o.value=c; o.innerText=c; sel.appendChild(o);
-    const od = document.createElement('option'); od.value=c; od.innerText=c; del.appendChild(od);
-    const dopt = document.createElement('option'); dopt.value = c; dataList.appendChild(dopt);
-    const btn = document.createElement('button'); btn.innerText = c;
-    btn.style.padding='6px 10px'; btn.style.borderRadius='8px'; btn.style.border='0'; btn.style.cursor='pointer';
-    btn.onclick = ()=>{ document.getElementById('analysisCategory').value = c; document.querySelector('input[name=range][value=3]').checked=true; runAnalysis(); }
+  getCategories().forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.innerText = c;
+    sel.appendChild(o);
+
+    const od = document.createElement('option');
+    od.value = c;
+    od.innerText = c;
+    del.appendChild(od);
+
+    const dopt = document.createElement('option');
+    dopt.value = c;
+    dataList.appendChild(dopt);
+
+    const btn = document.createElement('button');
+    btn.innerText = c;
+    btn.type = 'button';
+    btn.onclick = () => {
+      document.getElementById('analysisCategory').value = c;
+      document.querySelector('input[name=range][value=3]').checked = true;
+      runAnalysis();
+    };
     quick.appendChild(btn);
   });
 
   if(!catInput.value) catInput.value = getCategories()[0] || '';
 }
 
-/* ----------------- Render recent ----------------- */
-function renderRecent(){
-  const tbody = document.querySelector('#expTable tbody'); tbody.innerHTML='';
+function renderRecent() {
+  const tbody = document.querySelector('#expTable tbody');
+  tbody.innerHTML = '';
   const ex = loadExpenses();
-  ex.slice(0,200).forEach((r,i)=>{
+  ex.slice(0, 200).forEach((r, i) => {
     const tr = document.createElement('tr');
     const dt = formatDateISO(r.dateISO);
     tr.innerHTML = `<td>${i+1}</td><td>${r.category}</td><td>₹${r.amount.toLocaleString()}</td><td>${dt.date}</td><td>${dt.time}</td>`;
@@ -278,39 +502,49 @@ function renderRecent(){
   });
 }
 
-/* ----------------- KPIs ----------------- */
-function highestInRange(months){
+function highestInRange(months) {
   const ex = loadExpenses();
   const now = new Date();
   let best = null;
-  ex.forEach(e=>{
+  ex.forEach(e => {
     const d = new Date(e.dateISO);
     const diff = monthDiff(d, now);
-    if(diff <= months-1 && diff >= 0){
+    if(diff <= months - 1 && diff >= 0) {
       if(!best || e.amount > best.amount) best = e;
     }
   });
   return best;
 }
-function computeKpis(){
+
+function computeKpis() {
   const hiThis = highestInRange(1), hi3 = highestInRange(3), hi6 = highestInRange(6), hi12 = highestInRange(12);
-  function fill(a,b,o){
-    if(!o){ a.innerText='—'; b.innerText=''; return; }
+  
+  function fill(a, b, o) {
+    if(!o) {
+      a.innerText = '—';
+      b.innerText = '';
+      return;
+    }
     a.innerText = '₹' + o.amount.toLocaleString();
-    const dt = formatDateISO(o.dateISO); b.innerText = `${o.category} • ${dt.date} • ${dt.time}`;
+    const dt = formatDateISO(o.dateISO);
+    b.innerText = `${o.category} • ${dt.date} • ${dt.time}`;
   }
+  
   fill(document.getElementById('hiThis'), document.getElementById('hiThisMeta'), hiThis);
   fill(document.getElementById('hi3'), document.getElementById('hi3Meta'), hi3);
   fill(document.getElementById('hi6'), document.getElementById('hi6Meta'), hi6);
   fill(document.getElementById('hi12'), document.getElementById('hi12Meta'), hi12);
 }
 
-/* ----------------- Delete category ----------------- */
-document.getElementById('deleteCatBtn').addEventListener('click', ()=>{
+document.getElementById('deleteCatBtn').addEventListener('click', () => {
   const c = document.getElementById('deleteCategory').value;
-  if(!c){ alert('Choose a category to delete'); return; }
+  if(!c) {
+    alert('Choose a category to delete');
+    return;
+  }
   if(!confirm(`Delete ALL expenses in category "${c}"? This cannot be undone.`)) return;
-  const ex = loadExpenses().filter(x=>x.category !== c);
+  
+  const ex = loadExpenses().filter(x => x.category !== c);
   saveExpenses(ex);
   populateCategorySelects();
   renderRecent();
@@ -318,57 +552,59 @@ document.getElementById('deleteCatBtn').addEventListener('click', ()=>{
   runAnalysis();
 });
 
-/* ----------------- Chart utilities (kept as before) ----------------- */
 let lineChart = null, barChart = null, pieChart = null;
 
-function monthlyBuckets(rangeMonths){
+function monthlyBuckets(rangeMonths) {
   const now = new Date();
   const res = [];
-  for(let i=rangeMonths-1;i>=0;i--){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    const label = d.toLocaleString('en-GB',{month:'short',year:'2-digit'});
-    res.push({ label, date: d, total:0, byCategory: {} });
+  for(let i = rangeMonths - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = d.toLocaleString('en-GB', { month: 'short', year: '2-digit' });
+    res.push({ label, date: d, total: 0, byCategory: {} });
   }
+  
   const ex = loadExpenses();
-  ex.forEach(e=>{
+  ex.forEach(e => {
     const ed = new Date(e.dateISO);
     const diff = monthDiff(ed, now);
-    if(diff <= (rangeMonths-1) && diff >= 0){
-      const index = rangeMonths-1 - diff;
+    if(diff <= (rangeMonths - 1) && diff >= 0) {
+      const index = rangeMonths - 1 - diff;
       res[index].total += e.amount;
       res[index].byCategory[e.category] = (res[index].byCategory[e.category] || 0) + e.amount;
     }
   });
+  
   return res;
 }
 
-/* suggestions */
 const suggestionsPool = {
-  'Food': ['Limit outside-food orders to 2/week, meal-prep twice per week and set a weekly food cap.','Track "food outside" separately to see exact leak points.'],
-  'Rent': ['For rent/EMI, ensure an emergency buffer and consider refinancing for loans.','If rent >40% of net income, re-evaluate your budget or housing option.'],
-  'Travel': ['Combine trips, use public transport or monthly passes, or carpool to reduce commute cost.','Consider tracking fuel vs other travel costs separately.'],
-  'Vehicle loan': ['Refinancing the loan for a lower rate or longer tenure can reduce monthly EMI.','If possible, prepay small amounts to reduce interest burden.'],
-  'home loan': ['Check EMI refinancing and tax benefits. If EMIs crowd the budget, consider restructuring.','Keep an emergency buffer of 3-6 months for loans.'],
-  'Education': ['Look for scholarships, instalment plans or open-source/free resources to reduce costs.','Plan education expenses across months rather than lumpsums.'],
-  'Entertainment': ['Audit subscriptions and cancel unused ones. Set a monthly entertainment allowance.','Use free alternatives and limit impulse purchases.'],
-  'Miscellaneous': ['Group small misc purchases weekly and review if they are recurring.','Create a separate petty-cash budget for small purchases.']
+  'Food': ['Limit outside-food orders to 2/week, meal-prep twice per week and set a weekly food cap.', 'Track "food outside" separately to see exact leak points.'],
+  'Rent': ['For rent/EMI, ensure an emergency buffer and consider refinancing for loans.', 'If rent >40% of net income, re-evaluate your budget or housing option.'],
+  'Travel': ['Combine trips, use public transport or monthly passes, or carpool to reduce commute cost.', 'Consider tracking fuel vs other travel costs separately.'],
+  'Vehicle loan': ['Refinancing the loan for a lower rate or longer tenure can reduce monthly EMI.', 'If possible, prepay small amounts to reduce interest burden.'],
+  'home loan': ['Check EMI refinancing and tax benefits. If EMIs crowd the budget, consider restructuring.', 'Keep an emergency buffer of 3-6 months for loans.'],
+  'Education': ['Look for scholarships, instalment plans or open-source/free resources to reduce costs.', 'Plan education expenses across months rather than lumpsums.'],
+  'Entertainment': ['Audit subscriptions and cancel unused ones. Set a monthly entertainment allowance.', 'Use free alternatives and limit impulse purchases.'],
+  'Miscellaneous': ['Group small misc purchases weekly and review if they are recurring.', 'Create a separate petty-cash budget for small purchases.']
 };
 
-function computeSuggestionsAll(ag){
-  const entries = Object.entries(ag).sort((a,b)=>b[1]-a[1]);
-  const total = entries.reduce((s,e)=>s+e[1],0)||1;
-  const top = entries.slice(0,3).map(([k,v])=> `${k}: ${Math.round((v/total)*10000)/100}%`).join(' • ');
+function computeSuggestionsAll(ag) {
+  const entries = Object.entries(ag).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((s, e) => s + e[1], 0) || 1;
+  const top = entries.slice(0, 3).map(([k, v]) => `${k}: ${Math.round((v / total) * 10000) / 100}%`).join(' • ');
+  
   const area = document.getElementById('suggestText');
   const tips = document.getElementById('suggestTips');
-  area.innerHTML = `<div style="font-size:16px;font-weight:600">Top categories in this period</div><div style="margin-top:6px">${top || 'No data'}</div>`;
-  tips.innerHTML = `Tips: If a single category is >30% consider setting a monthly cap for it. Prioritize reviewing the top category first.`;
+  area.innerHTML = `<div style="font-size:clamp(14px,2.5vw,18px);font-weight:600">Top categories in this period</div><div style="margin-top:6px">${top || 'No data'}</div>`;
+  tips.innerHTML = `💡 Tip: If a single category is >30% consider setting a monthly cap for it. Prioritize reviewing the top category first.`;
 }
 
-function computeSuggestions(cat, range, metric, buckets, catSeries, totalSeries){
-  const totalSum = totalSeries.reduce((a,b)=>a+b,0);
-  const catSum = catSeries.reduce((a,b)=>a+b,0);
-  const sharePct = totalSum ? Math.round((catSum/totalSum)*10000)/100 : 0;
+function computeSuggestions(cat, range, metric, buckets, catSeries, totalSeries) {
+  const totalSum = totalSeries.reduce((a, b) => a + b, 0);
+  const catSum = catSeries.reduce((a, b) => a + b, 0);
+  const sharePct = totalSum ? Math.round((catSum / totalSum) * 10000) / 100 : 0;
   const pool = suggestionsPool[cat] || ['Monitor this category regularly; small recurring costs add up.'];
+  
   let suggestion = `This category accounts for ${sharePct}% of spending in the selected period.`;
   if(sharePct >= 40) suggestion = `⚠️ High spending on ${cat} — ${pool[0]}`;
   else if(sharePct >= 25) suggestion = `Notice: ${cat} is ${sharePct}% of your spending. ${pool[0]}`;
@@ -376,120 +612,141 @@ function computeSuggestions(cat, range, metric, buckets, catSeries, totalSeries)
   else suggestion = `Good — ${cat} makes up only ${sharePct}% of spending. Keep tracking.`;
 
   const avgMonthly = range ? Math.round(catSum / range) : 0;
-  if(cat === 'Food' && avgMonthly > 10000){
+  if(cat === 'Food' && avgMonthly > 10000) {
     suggestion += ` Tip: average monthly Food = ₹${avgMonthly.toLocaleString()}. Try cooking more at home.`;
   }
 
-  const sugArea = document.getElementById('suggestText'), tips = document.getElementById('suggestTips');
-  if(sharePct >= 35) document.getElementById('suggestionsArea').className = 'suggest-box danger-suggest';
-  else document.getElementById('suggestionsArea').className = 'suggest-box';
-  sugArea.innerHTML = `<div style="font-size:16px;font-weight:600">${suggestion}</div><div style="margin-top:8px">${pool[0]}</div>`;
-  tips.innerHTML = `Actionable: 1) Set a target cap for ${cat}. 2) Track 2 weeks of receipts to identify leaking sub-items. 3) Re-evaluate subscriptions related to ${cat}.`;
+  const sugArea = document.getElementById('suggestText');
+  const tips = document.getElementById('suggestTips');
+  
+  if(sharePct >= 35) document.getElementById('suggestionsArea').className = 'card suggest-box danger-suggest';
+  else document.getElementById('suggestionsArea').className = 'card suggest-box';
+  
+  sugArea.innerHTML = `<div style="font-size:clamp(14px,2.5vw,18px);font-weight:600">${suggestion}</div><div style="margin-top:8px">${pool[0]}</div>`;
+  tips.innerHTML = `⚡ Actionable: 1) Set a target cap for ${cat}. 2) Track 2 weeks of receipts to identify leaking sub-items. 3) Re-evaluate subscriptions related to ${cat}.`;
 }
 
-/* ----------------- Analysis & Charts (runAnalysis) ----------------- */
-function runAnalysis(){
+function runAnalysis() {
   const selVal = document.getElementById('analysisCategory').value;
   const isAll = selVal === '__ALL__';
   const range = Number(document.querySelector('input[name=range]:checked').value);
   const lineMetric = document.getElementById('lineData').value;
   const showPie = document.getElementById('showPie').checked;
   const buckets = monthlyBuckets(range);
-  const labels = buckets.map(b=>b.label);
-  const totalSeries = buckets.map(b=>b.total || 0);
+  const labels = buckets.map(b => b.label);
+  const totalSeries = buckets.map(b => b.total || 0);
 
   const aggregatePerCategory = {};
-  buckets.forEach(b=>{
-    for(const k in b.byCategory){ aggregatePerCategory[k] = (aggregatePerCategory[k]||0) + b.byCategory[k]; }
+  buckets.forEach(b => {
+    for(const k in b.byCategory) {
+      aggregatePerCategory[k] = (aggregatePerCategory[k] || 0) + b.byCategory[k];
+    }
   });
 
-  if(lineChart){ lineChart.destroy(); lineChart = null; }
-  if(barChart){ barChart.destroy(); barChart = null; }
-  if(pieChart){ pieChart.destroy(); pieChart = null; }
+  if(lineChart) { lineChart.destroy(); lineChart = null; }
+  if(barChart) { barChart.destroy(); barChart = null; }
+  if(pieChart) { pieChart.destroy(); pieChart = null; }
 
-  if(isAll){
+  if(isAll) {
     const cats = Object.keys(aggregatePerCategory).length ? Object.keys(aggregatePerCategory) : getCategories();
-    const colors = ['#ef4444','#f97316','#facc15','#4ade80','#60a5fa','#a78bfa','#f472b6','#9ca3af','#7c3aed','#0ea5a0'];
-    const datasets = cats.map((cat, idx)=>{
+    const colors = ['#ef4444', '#f97316', '#facc15', '#4ade80', '#60a5fa', '#a78bfa', '#f472b6', '#9ca3af', '#7c3aed', '#0ea5a0'];
+    const datasets = cats.map((cat, idx) => {
       const series = buckets.map(b => b.byCategory[cat] || 0);
-      const data = (lineMetric==='share') ? series.map((v,i)=> totalSeries[i] ? Math.round((v/totalSeries[i])*10000)/100 : 0) : series;
-      return { label:cat, data, borderColor: colors[idx%colors.length], backgroundColor:'rgba(0,0,0,0)', tension:0.35, pointRadius:3 };
+      const data = (lineMetric === 'share') ? series.map((v, i) => totalSeries[i] ? Math.round((v / totalSeries[i]) * 10000) / 100 : 0) : series;
+      return { label: cat, data, borderColor: colors[idx % colors.length], backgroundColor: 'rgba(0,0,0,0)', tension: 0.35, pointRadius: 3 };
     });
 
     const ctxL = document.getElementById('lineChart').getContext('2d');
     lineChart = new Chart(ctxL, {
-      type:'line',
-      data:{ labels, datasets },
-      options:{ responsive:true, maintainAspectRatio:false,
-        scales:{ y:{ beginAtZero:true, ticks:{ callback: v => lineMetric==='share' ? v+'%' : '₹'+v } } },
-        plugins:{ legend:{ position:'bottom', labels:{boxWidth:12} } }
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { callback: v => lineMetric === 'share' ? v + '%' : '₹' + v } } },
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
       }
     });
 
-    const pLabels = Object.keys(aggregatePerCategory), pData = pLabels.map(k=>aggregatePerCategory[k]);
+    const pLabels = Object.keys(aggregatePerCategory);
+    const pData = pLabels.map(k => aggregatePerCategory[k]);
     document.getElementById('barChart').style.display = showPie ? 'none' : '';
     document.getElementById('pieChart').style.display = showPie ? '' : 'none';
-    const palette = ['#ef4444','#f97316','#facc15','#4ade80','#60a5fa','#a78bfa','#f472b6','#9caaf','#7c3aed','#0ea5a0'];
+    
+    const palette = ['#ef4444', '#f97316', '#facc15', '#4ade80', '#60a5fa', '#a78bfa', '#f472b6', '#9ca3af', '#7c3aed', '#0ea5a0'];
 
-    if(showPie){
+    if(showPie) {
       const ctxP = document.getElementById('pieChart').getContext('2d');
-      pieChart = new Chart(ctxP, { type:'pie', data:{ labels:pLabels, datasets:[{ data:pData, backgroundColor: palette.slice(0,pLabels.length) }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right'}} }});
+      pieChart = new Chart(ctxP, {
+        type: 'pie',
+        data: { labels: pLabels, datasets: [{ data: pData, backgroundColor: palette.slice(0, pLabels.length) }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
     } else {
       const ctxB = document.getElementById('barChart').getContext('2d');
-      barChart = new Chart(ctxB, { type:'bar', data:{ labels:pLabels, datasets:[{ label:'Total', data:pData, backgroundColor: palette.slice(0,pLabels.length) }] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v => '₹'+v } } }, plugins:{ legend:{ display:false } } }});
+      barChart = new Chart(ctxB, {
+        type: 'bar',
+        data: { labels: pLabels, datasets: [{ label: 'Total', data: pData, backgroundColor: palette.slice(0, pLabels.length) }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } }, plugins: { legend: { display: false } } }
+      });
     }
 
-    document.getElementById('chartTitle').innerText = `All categories — ${lineMetric==='share'?'Share %':'Monthly amount'} (${range}m)`;
+    document.getElementById('chartTitle').innerText = `All categories — ${lineMetric === 'share' ? 'Share %' : 'Monthly amount'} (${range}m)`;
     document.getElementById('barTitle').innerText = `Totals by category (last ${range} months)`;
     computeSuggestionsAll(aggregatePerCategory);
     return;
   }
 
-  // single category
   const cat = selVal;
   const catSeries = buckets.map(b => b.byCategory[cat] || 0);
-  const displaySeries = lineMetric === 'share' ? catSeries.map((v,i)=> totalSeries[i] ? Math.round((v/totalSeries[i])*10000)/100 : 0) : catSeries;
+  const displaySeries = lineMetric === 'share' ? catSeries.map((v, i) => totalSeries[i] ? Math.round((v / totalSeries[i]) * 10000) / 100 : 0) : catSeries;
 
   const ctxL = document.getElementById('lineChart').getContext('2d');
   lineChart = new Chart(ctxL, {
-    type:'line',
-    data:{ labels, datasets:[{ label: (lineMetric==='share'?'% share':'Amount'), data: displaySeries, fill:true, tension:0.35, pointRadius:4, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)'}] },
-    options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v => lineMetric==='share' ? v+'%' : '₹'+v } } }, plugins:{ legend:{ display:false } } }
+    type: 'line',
+    data: { labels, datasets: [{ label: (lineMetric === 'share' ? '% share' : 'Amount'), data: displaySeries, fill: true, tension: 0.35, pointRadius: 4, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.05)' }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: v => lineMetric === 'share' ? v + '%' : '₹' + v } } }, plugins: { legend: { display: false } } }
   });
 
   document.getElementById('barChart').style.display = showPie ? 'none' : '';
   document.getElementById('pieChart').style.display = showPie ? '' : 'none';
 
-  if(!showPie){
+  if(!showPie) {
     const ctxB = document.getElementById('barChart').getContext('2d');
     barChart = new Chart(ctxB, {
-      type:'bar',
-      data:{ labels, datasets:[ { label: cat, data: catSeries, backgroundColor:'rgba(79,70,229,0.9)' }, { label:'Total', data: totalSeries, backgroundColor:'rgba(203,213,225,0.9)' } ] },
-      options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v => '₹'+v } } }, plugins:{ legend:{ position:'bottom' } } }
+      type: 'bar',
+      data: { labels, datasets: [{ label: cat, data: catSeries, backgroundColor: 'rgba(79,70,229,0.9)' }, { label: 'Total', data: totalSeries, backgroundColor: 'rgba(203,213,225,0.9)' }] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + v } } }, plugins: { legend: { position: 'bottom' } } }
     });
   } else {
     const ag = {};
-    buckets.forEach(b=>{ for(const k in b.byCategory){ ag[k] = (ag[k]||0) + b.byCategory[k]; }});
-    const pLabels = Object.keys(ag), pData = pLabels.map(k=>ag[k]);
-    const palette = ['#ef4444','#f97316','#facc15','#4ade80','#60a5fa','#a78bfa','#f472b6','#9caaf','#7c3aed','#0ea5a0'];
+    buckets.forEach(b => { for(const k in b.byCategory) { ag[k] = (ag[k] || 0) + b.byCategory[k]; } });
+    const pLabels = Object.keys(ag);
+    const pData = pLabels.map(k => ag[k]);
+    const palette = ['#ef4444', '#f97316', '#facc15', '#4ade80', '#60a5fa', '#a78bfa', '#f472b6', '#9ca3af', '#7c3aed', '#0ea5a0'];
+    
     const ctxP = document.getElementById('pieChart').getContext('2d');
-    pieChart = new Chart(ctxP, { type:'pie', data:{ labels:pLabels, datasets:[{ data:pData, backgroundColor: palette.slice(0,pLabels.length) }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right'}}}});
+    pieChart = new Chart(ctxP, {
+      type: 'pie',
+      data: { labels: pLabels, datasets: [{ data: pData, backgroundColor: palette.slice(0, pLabels.length) }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
   }
 
   computeSuggestions(cat, range, lineMetric, buckets, catSeries, totalSeries);
-  document.getElementById('chartTitle').innerText = `${cat} — ${lineMetric==='share'?'Share %':'Monthly amount'} (${range}m)`;
+  document.getElementById('chartTitle').innerText = `${cat} — ${lineMetric === 'share' ? 'Share %' : 'Monthly amount'} (${range}m)`;
   document.getElementById('barTitle').innerText = `Monthly amounts (last ${range} months)`;
 }
 
-/* ----------------- Save handler (robust) ----------------- */
-document.getElementById('saveBtn').addEventListener('click', function saveHandler(){
-  try{
+document.getElementById('saveBtn').addEventListener('click', function saveHandler() {
+  try {
     const amtEl = document.getElementById('amt');
     const catEl = document.getElementById('cat');
     const noteEl = document.getElementById('note');
-    if(!amtEl || !catEl || !noteEl){
-      console.error('Save: expected elements not found (ids: amt, cat, note).');
-      alert('Internal error: form fields missing (check console).');
+    
+    if(!amtEl || !catEl || !noteEl) {
+      console.error('Save: expected elements not found');
+      alert('Internal error: form fields missing');
       return;
     }
 
@@ -498,12 +755,12 @@ document.getElementById('saveBtn').addEventListener('click', function saveHandle
     const category = (catEl.value || '').trim();
     const note = (noteEl.value || '').trim();
 
-    if(Number.isNaN(amount) || amount <= 0){
+    if(Number.isNaN(amount) || amount <= 0) {
       alert('Enter a valid amount greater than 0.');
       amtEl.focus();
       return;
     }
-    if(!category){
+    if(!category) {
       alert('Please enter or select a category.');
       catEl.focus();
       return;
@@ -511,22 +768,22 @@ document.getElementById('saveBtn').addEventListener('click', function saveHandle
 
     const expense = { amount: Math.round(amount), category, note, dateISO: new Date().toISOString() };
 
-    // load, push front, save
     let arr = [];
-    try{
+    try {
       const raw = localStorage.getItem(EXP_KEY);
       arr = raw ? JSON.parse(raw) : [];
       if(!Array.isArray(arr)) arr = [];
-    }catch(e){ arr = []; console.warn('Parsing existing expenses failed - starting new array', e); }
+    } catch(e) {
+      arr = [];
+      console.warn('Parsing existing expenses failed', e);
+    }
 
     arr.unshift(expense);
     saveExpenses(arr);
 
-    // clear inputs
     amtEl.value = '';
     noteEl.value = '';
 
-    // refresh UI
     populateCategorySelects();
     renderRecent();
     computeKpis();
@@ -534,42 +791,47 @@ document.getElementById('saveBtn').addEventListener('click', function saveHandle
 
     alert('Saved successfully');
     console.log('Saved expense', expense);
-  }catch(err){
+  } catch(err) {
     console.error('Save failed', err);
     alert('Save failed — see console for details.');
   }
 });
 
-/* refresh categories button */
-document.getElementById('refreshCats').addEventListener('click', ()=>{
+document.getElementById('refreshCats').addEventListener('click', () => {
   populateCategorySelects();
 });
 
-/* show analysis & pie toggle */
 document.getElementById('showAnalysis').addEventListener('click', runAnalysis);
 document.getElementById('showPie').addEventListener('change', runAnalysis);
 
-/* ----------------- Export CSV ----------------- */
-function csvEscape(v){
-  if(v==null) return '';
+function csvEscape(v) {
+  if(v == null) return '';
   const s = String(v);
-  if(s.indexOf(',')>=0 || s.indexOf('"')>=0 || s.indexOf('\n')>=0) return `"${s.replace(/"/g,'""')}"`;
+  if(s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf('\n') >= 0) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }
-function exportCSV(){
+
+function exportCSV() {
   const rows = loadExpenses();
-  if(!rows || rows.length===0){ alert('No expenses to export'); return; }
-  const header = ['Sl','Category','Amount','Date','Time','Note','iso'];
-  const lines = [ header.join(',') ];
-  rows.forEach((r,i)=>{
+  if(!rows || rows.length === 0) {
+    alert('No expenses to export');
+    return;
+  }
+  
+  const header = ['Sl', 'Category', 'Amount', 'Date', 'Time', 'Note', 'iso'];
+  const lines = [header.join(',')];
+  
+  rows.forEach((r, i) => {
     const dt = formatDateISO(r.dateISO);
-    const line = [i+1, r.category, r.amount, dt.date, dt.time, r.note || '', r.dateISO || ''];
+    const line = [i + 1, r.category, r.amount, dt.date, dt.time, r.note || '', r.dateISO || ''];
     lines.push(line.map(csvEscape).join(','));
   });
+  
   const csv = lines.join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const now = new Date();
-  const fname = `expenses-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.csv`;
+  const fname = `expenses-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.csv`;
+  
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = fname;
@@ -577,21 +839,20 @@ function exportCSV(){
   link.click();
   link.remove();
 }
+
 document.getElementById('exportBtn').addEventListener('click', exportCSV);
 
-/* ----------------- Initialization & optional sample seed ----------------- */
-function initial(){
+function initial() {
   populateCategorySelects();
   renderRecent();
   computeKpis();
 
-  // seed minimal sample data only if empty (safe to remove)
   const ex = loadExpenses();
-  if(ex.length === 0){
+  if(ex.length === 0) {
     const now = new Date();
     const sample = [
-      { amount: 500, category:'Miscellaneous', note:'sample', dateISO: new Date(now.getFullYear(), now.getMonth(), 21,16,47).toISOString() },
-      { amount: 200, category:'Food', note:'sample', dateISO: new Date(now.getFullYear(), now.getMonth(), 21,16,38).toISOString() }
+      { amount: 500, category: 'Miscellaneous', note: 'sample', dateISO: new Date(now.getFullYear(), now.getMonth(), 21, 16, 47).toISOString() },
+      { amount: 200, category: 'Food', note: 'sample', dateISO: new Date(now.getFullYear(), now.getMonth(), 21, 16, 38).toISOString() }
     ];
     saveExpenses(sample);
     populateCategorySelects();
