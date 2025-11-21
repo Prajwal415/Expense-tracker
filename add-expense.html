@@ -5,97 +5,549 @@
   <title>Add Expense</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Base UI kept the same; category panel modified to only show charts (line/pie) */
+    body{font-family:Inter,system-ui,Arial;background:#eef3fb;margin:0;padding:22px}
+    .container{max-width:960px;margin:0 auto}
+    h2{font-size:26px;margin:6px 0 12px;color:#0b2340}
+    .link{color:#2a66d9;text-decoration:underline;display:inline-block;margin-bottom:8px}
+    .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(20,30,60,0.06);margin-bottom:16px}
+    input[type="number"], input[type="text"], select{width:100%;padding:12px;border-radius:10px;border:1px solid #e6e9ef;margin:8px 0;font-size:15px}
+    button{display:inline-block;padding:10px 14px;border-radius:10px;border:0;background:#3f67e6;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
+    .small-btn{background:#f0f3ff;color:#2a2f6b;padding:8px;border-radius:8px;border:0;cursor:pointer}
+    .danger-btn{background:#ffecec;color:#9a1f1f;padding:8px;border-radius:8px;border:0;cursor:pointer}
+
+    table{width:100%;border-collapse:collapse;background:transparent;margin-top:8px}
+    th, td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee;font-size:14px}
+    th{font-weight:700}
+
+    /* Highest cards */
+    .row {display:flex;gap:12px;flex-wrap:wrap}
+    .stat-card{flex:1;min-width:180px;padding:12px;border-radius:12px;background:#fff;box-shadow:0 8px 20px rgba(20,30,60,0.05)}
+    .stat-value{margin-top:8px;font-size:18px;font-weight:700}
+    .stat-meta{font-size:13px;color:#666;margin-top:6px}
+
+    /* Category Analysis: simplified to single chart area switchable between line and pie */
+    #category-panel .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+    .controls label{font-size:14px}
+    .chart-area{background:#fff;border-radius:12px;padding:12px;box-shadow:0 10px 20px rgba(20,30,60,0.04)}
+    .chart-topline{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .chart-title{font-weight:700;font-size:15px;margin:6px 0}
+    .chart-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .toggle { background:#f4f6fb;border-radius:999px;padding:6px;display:inline-flex;gap:6px;align-items:center }
+    .toggle input { margin-right:6px }
+
+    /* Chart sizing: larger (double length) and wider (1.5x width effect via aspectRatio). mobile-friendly */
+    #chartWrapper{margin-top:12px;display:flex;justify-content:center}
+    #chartCanvas { width:100% !important; height:320px !important; max-width:900px; } /* tall ~320px */
+    #pieCanvas   { width:100% !important; height:320px !important; max-width:900px; }
+
+    /* swipe hint small */
+    .swipe-hint{font-size:12px;color:#6b7280;margin-top:6px}
+
+    /* responsive fallback: stack */
+    @media (max-width:520px) {
+      body{padding:14px}
+      #chartCanvas, #pieCanvas { height:300px !important; }
+    }
+    @media (max-width:360px) {
+      #chartCanvas, #pieCanvas { height:260px !important; }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Add Expense</h2>
+    <a class="link" href="dashboard.html">← Back to Dashboard</a>
 
-<div class="container">
-  <h2>Add Expense</h2>
-  <a class="link" href="dashboard.html">← Back to Dashboard</a>
+    <!-- Add Expense -->
+    <div class="card">
+      <input id="amt" type="number" placeholder="Amount (₹)" min="0" step="0.01" />
+      <input id="cat" type="text" placeholder="Category (Food, Bills, Travel)" />
+      <input id="note" type="text" placeholder="Note (optional)" />
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+        <button onclick="addExpense()">Save Expense</button>
+        <button class="small-btn" onclick="refreshCategoryList()">Refresh Categories</button>
+      </div>
+    </div>
 
-  <div class="card">
-    <input id="amt" type="number" placeholder="Amount (₹)">
-    <input id="cat" placeholder="Category (Food, Bills, Travel)">
-    <input id="note" placeholder="Note (optional)">
-    <button onclick="addExpense()">Save Expense</button>
+    <!-- Highest expense cards (unchanged) -->
+    <div class="card" id="highest-stats">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0">Highest Expenses</h3>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="stat-card" id="high-1m"><strong>This month</strong><div class="stat-value">—</div><div class="stat-meta"></div></div>
+        <div class="stat-card" id="high-3m"><strong>Last 3 months</strong><div class="stat-value">—</div><div class="stat-meta"></div></div>
+        <div class="stat-card" id="high-6m"><strong>Last 6 months</strong><div class="stat-value">—</div><div class="stat-meta"></div></div>
+      </div>
+    </div>
+
+    <!-- CATEGORY ANALYSIS: only chart area visible, with toggle to switch to pie -->
+    <div class="card" id="category-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h3 style="margin:0">Category Analysis</h3>
+
+        <!-- Delete specific category selector -->
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="deleteCategorySelect" style="min-width:160px;padding:8px;border-radius:8px;border:1px solid #e6e9ef"></select>
+          <button class="danger-btn" onclick="deleteSelectedCategory()">Delete Selected</button>
+        </div>
+      </div>
+
+      <div class="controls" style="margin-top:12px">
+        <div>
+          <label style="font-weight:600;margin-right:8px">Analyze category:</label>
+          <select id="categorySelect" style="min-width:180px;padding:8px;border-radius:8px;border:1px solid #e6e9ef"></select>
+        </div>
+
+        <div>
+          <label style="font-weight:600;margin-right:8px">Range:</label>
+          <label><input type="radio" name="range" value="3"> 3m</label>
+          <label style="margin-left:6px;"><input type="radio" name="range" value="6"> 6m</label>
+          <label style="margin-left:6px;"><input type="radio" name="range" value="12" checked> 12m</label>
+        </div>
+
+        <div>
+          <label style="font-weight:600;margin-right:8px">Chart view:</label>
+          <div class="toggle">
+            <label style="display:inline-flex;align-items:center"><input type="checkbox" id="chartViewToggle"> Show Pie</label>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-weight:600;margin-right:8px">Line data:</label>
+          <select id="lineMode" style="min-width:140px;padding:6px;border-radius:8px;border:1px solid #e6e9ef">
+            <option value="share">Share %</option>
+            <option value="amount">Monthly amount (₹)</option>
+          </select>
+        </div>
+
+        <div style="margin-left:auto">
+          <button class="small-btn" onclick="updateCategoryStats()">Show</button>
+        </div>
+      </div>
+
+      <div class="chart-area" id="chartArea" style="margin-top:12px">
+        <div class="chart-topline">
+          <div class="chart-title" id="chartTitle">Category share (last 12 months)</div>
+          <div class="chart-controls">
+            <div style="font-size:13px;color:#6b7280">Swipe left/right or toggle to switch view</div>
+          </div>
+        </div>
+
+        <div id="chartWrapper" style="margin-top:8px; touch-action: pan-y;">
+          <!-- Line chart (default visible) -->
+          <canvas id="chartCanvas" style="display:block"></canvas>
+          <!-- Pie chart (hidden by default) -->
+          <canvas id="pieCanvas" style="display:none"></canvas>
+        </div>
+
+        <div class="swipe-hint">Tip: swipe the chart left/right to switch between Line & Pie on mobile</div>
+      </div>
+    </div>
+
+    <!-- Recent expenses table -->
+    <div class="card">
+      <h3 style="margin-top:0">Recent Expenses</h3>
+      <table id="expTable" aria-describedby="recent-expenses">
+        <thead>
+          <tr><th style="width:6%">Sl.</th><th style="width:36%">Category</th><th style="width:18%">Price (₹)</th><th style="width:20%">Date</th><th style="width:20%">Time</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Recent Expenses</h3>
-    <table id="expTable" style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="text-align:left;">
-          <th style="padding:8px;border-bottom:1px solid #eee;width:6%;">Sl.</th>
-          <th style="padding:8px;border-bottom:1px solid #eee;width:36%;">Category</th>
-          <th style="padding:8px;border-bottom:1px solid #eee;width:18%;">Price (₹)</th>
-          <th style="padding:8px;border-bottom:1px solid #eee;width:20%;">Date</th>
-          <th style="padding:8px;border-bottom:1px solid #eee;width:20%;">Time</th>
-        </tr>
-      </thead>
-      <tbody id="expBody">
-        <tr><td colspan="5" style="padding:10px">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-/* expense storage in localStorage under key "expenses" */
-function loadExpenses(){
-  const arr = JSON.parse(localStorage.getItem('expenses') || '[]');
-  const tbody = document.getElementById('expBody');
-  if(!arr.length){
-    tbody.innerHTML = '<tr><td colspan="5" style="padding:10px">No expenses yet.</td></tr>';
-    return;
+  <script>
+  /*******************************
+   * Storage + helpers (same behavior)
+   *******************************/
+  const STORAGE_KEY = 'expenses';
+
+  function nowDateTimeParts() {
+    const d = new Date();
+    return {
+      dateStr: `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`,
+      timeStr: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`,
+      dateObj: d
+    };
   }
-  const rows = arr.slice().reverse().map((e, idx) => {
-    // idx 0 is latest
-    const sl = idx + 1;
-    return `<tr>
-      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${sl}</td>
-      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${escapeHtml(e.category)}</td>
-      <td style="padding:8px;border-bottom:1px solid #f1f1f1">₹${Number(e.amount).toLocaleString()}</td>
-      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${e.date}</td>
-      <td style="padding:8px;border-bottom:1px solid #f1f1f1">${e.time}</td>
-    </tr>`;
-  }).join('');
-  tbody.innerHTML = rows;
-}
 
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
+  function parseDateString(s) {
+    if (!s) return null;
+    s = s.trim();
+    if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+      const [d,m,y] = s.split('/');
+      return new Date(Number(y), Number(m)-1, Number(d));
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
 
-function addExpense(){
-  const amount = Number(document.getElementById('amt').value);
-  const category = document.getElementById('cat').value.trim() || 'Other';
-  const note = document.getElementById('note').value.trim() || '';
+  function readExpenses() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return arr.map(e => {
+        const amount = Number(e.amount || e.amt || e.price || 0);
+        const dateObj = e.dateObj ? new Date(e.dateObj) : (e.dateStr ? parseDateString(e.dateStr) : null);
+        return {
+          id: e.id || (Math.random().toString(36).slice(2)),
+          amount,
+          category: (e.category || e.cat || '').toString(),
+          note: e.note || '',
+          dateStr: e.dateStr || '',
+          timeStr: e.timeStr || '',
+          dateObj
+        };
+      });
+    } catch (err) {
+      console.warn('Error reading expenses', err);
+      return [];
+    }
+  }
 
-  if(!amount || amount <= 0){ alert('Enter a valid amount'); return; }
+  function saveExpenses(arr) {
+    const safe = arr.map(e => ({
+      id: e.id,
+      amount: e.amount,
+      category: e.category,
+      note: e.note,
+      dateStr: e.dateStr,
+      timeStr: e.timeStr,
+      dateObj: e.dateObj ? e.dateObj.toISOString() : null
+    }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+    window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue: JSON.stringify(safe) }));
+  }
 
-  const d = new Date();
-  const entry = {
-    amount,
-    category,
-    note,
-    date: d.toLocaleDateString(),
-    time: d.toLocaleTimeString()
-  };
+  /* ---------- table rendering ---------- */
+  function escapeHtml(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function formatDate(d) {
+    if (!d) return '';
+    const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
 
-  const arr = JSON.parse(localStorage.getItem('expenses') || '[]');
-  arr.push(entry);
-  localStorage.setItem('expenses', JSON.stringify(arr));
+  function renderTable() {
+    const tbody = document.querySelector('#expTable tbody');
+    tbody.innerHTML = '';
+    const arr = readExpenses().sort((a,b)=> (b.dateObj?b.dateObj.getTime():0) - (a.dateObj?a.dateObj.getTime():0));
+    if (!arr.length) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="5" style="text-align:center;padding:16px;color:#666">No expenses yet</td>';
+      tbody.appendChild(tr); return;
+    }
+    for (let i=0;i<arr.length;i++){
+      const e = arr[i];
+      const tr = document.createElement('tr');
+      const priceText = '₹' + (Number(e.amount)%1===0 ? e.amount.toString() : Number(e.amount).toFixed(2));
+      const dateText = e.dateStr || (e.dateObj?formatDate(e.dateObj):'');
+      const timeText = e.timeStr || '';
+      tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(e.category)}</td><td>${priceText}</td><td>${dateText}</td><td>${timeText}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
 
-  // clear inputs
-  document.getElementById('amt').value = '';
-  document.getElementById('cat').value = '';
-  document.getElementById('note').value = '';
+  /* ---------- add expense ---------- */
+  function addExpense() {
+    const amtEl = document.getElementById('amt'), catEl = document.getElementById('cat'), noteEl = document.getElementById('note');
+    const amount = Number(amtEl.value), category = (catEl.value||'').trim(), note = (noteEl.value||'').trim();
+    if (!category) { alert('Please enter a category'); return; }
+    if (!amount || amount <= 0) { alert('Please enter a valid amount'); return; }
+    const parts = nowDateTimeParts();
+    const e = { id: Math.random().toString(36).slice(2), amount, category, note, dateStr: parts.dateStr, timeStr: parts.timeStr, dateObj: parts.dateObj };
+    const arr = readExpenses(); arr.push(e); saveExpenses(arr);
+    amtEl.value=''; catEl.value=''; noteEl.value='';
+    renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
+  }
 
-  loadExpenses();
-}
+  /* ---------- highest cards ---------- */
+  function rangeStartDateForMonths(months) {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() - (months - 1), 1, 0, 0, 0);
+  }
+  function highestExpenseWithinMonths(months) {
+    const expenses = readExpenses(); if (!expenses.length) return null;
+    const now = new Date(); const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1, 0,0,0);
+    let max = null;
+    for (const e of expenses) {
+      const d = e.dateObj || (e.dateStr ? parseDateString(e.dateStr): null);
+      if (!d) continue;
+      if (d >= start && d <= now) { if (!max || Number(e.amount) > Number(max.amount)) max = e; }
+    }
+    return max;
+  }
+  function formatDateTimeForMeta(e) {
+    if (!e) return ''; const d = e.dateObj || (e.dateStr ? parseDateString(e.dateStr) : null); const datePart = d ? formatDate(d) : (e.dateStr||'');
+    return [e.category||'', datePart, e.timeStr||''].filter(Boolean).join(' · ');
+  }
+  function updateHighestCards() {
+    const config = [{id:'high-1m',months:1},{id:'high-3m',months:3},{id:'high-6m',months:6}];
+    for (const c of config) {
+      const container = document.getElementById(c.id);
+      if (!container) continue;
+      const valueEl = container.querySelector('.stat-value'); const metaEl = container.querySelector('.stat-meta');
+      const res = highestExpenseWithinMonths(c.months);
+      if (!res) { valueEl.innerText='—'; metaEl.innerText='No data'; } else {
+        const amountStr = (Number(res.amount)%1===0) ? res.amount.toString() : Number(res.amount).toFixed(2);
+        valueEl.innerText = '₹' + amountStr; metaEl.innerText = formatDateTimeForMeta(res);
+      }
+    }
+  }
 
-/* init */
-document.addEventListener('DOMContentLoaded', () => {
-  loadExpenses();
-});
-</script>
+  /* ---------- category helpers ---------- */
+  function sumTotal(expenses) { return expenses.reduce((s,e)=>s + (Number(e.amount)||0), 0); }
+  function filterByMonthRange(expenses, months) {
+    const now = new Date(); const start = rangeStartDateForMonths(months);
+    return expenses.filter(e => { const d = e.dateObj || (e.dateStr?parseDateString(e.dateStr):null); return d && d>=start && d<=now; });
+  }
 
+  /* ---------- category lists (analysis + delete) ---------- */
+  function refreshCategoryList() {
+    const sel = document.getElementById('categorySelect');
+    const del = document.getElementById('deleteCategorySelect');
+    const expenses = readExpenses();
+    const set = new Set();
+    for (const e of expenses) if (e.category && e.category.trim()) set.add(e.category.trim());
+    const arr = Array.from(set).sort((a,b)=>a.localeCompare(b));
+    const cur = sel.value, curDel = del.value;
+    sel.innerHTML = '<option value="">-- choose category --</option>';
+    del.innerHTML = '<option value="">-- choose to delete --</option>';
+    arr.forEach(c => { const o = document.createElement('option'); o.value=c; o.text=c; sel.appendChild(o); const p = document.createElement('option'); p.value=c; p.text=c; del.appendChild(p); });
+    if (cur) sel.value = cur; if (curDel) del.value = curDel;
+  }
+
+  /* ---------- delete specific category ---------- */
+  function deleteSelectedCategory() {
+    const del = document.getElementById('deleteCategorySelect');
+    const category = (del.value||'').trim();
+    if (!category) { alert('Choose category to delete'); return; }
+    if (!confirm(`Delete ALL expenses in category "${category}"? This cannot be undone.`)) return;
+    const expenses = readExpenses(); const remaining = expenses.filter(e => !(e.category && e.category.toLowerCase()===category.toLowerCase()));
+    saveExpenses(remaining); renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
+    alert(`Deleted category "${category}"`);
+  }
+
+  /* ---------- Chart logic: line (share% or amount) and pie ---------- */
+  let lineChart = null, pieChart = null;
+  function lastNMonthsLabels(n) {
+    const labels=[]; const now = new Date();
+    for (let i=n-1;i>=0;i--){ const d = new Date(now.getFullYear(), now.getMonth()-i,1); const mm = d.toLocaleString('default',{month:'short'}); const yy = String(d.getFullYear()).slice(2); labels.push(`${mm} '${yy}`); }
+    return labels;
+  }
+  function monthRangeForOffset(offsetFromNow) {
+    const now = new Date(); const start = new Date(now.getFullYear(), now.getMonth()-offsetFromNow,1,0,0,0); const end = new Date(start.getFullYear(), start.getMonth()+1,1,0,0,-1); return {start,end};
+  }
+
+  function computeLineData(category, months, mode) {
+    // mode: 'share' -> percent; 'amount' -> monthly category amount
+    const expenses = readExpenses(); const values=[];
+    for (let offset=months-1; offset>=0; offset--) {
+      const {start,end} = monthRangeForOffset(offset);
+      let monthTotal=0, catTotal=0;
+      for (const e of expenses) {
+        const d = e.dateObj || (e.dateStr?parseDateString(e.dateStr):null);
+        if (!d) continue;
+        if (d>=start && d<=end) { monthTotal += Number(e.amount||0); if (category && e.category && e.category.toLowerCase()===category.toLowerCase()) catTotal += Number(e.amount||0); }
+      }
+      if (mode==='share') values.push(monthTotal>0 ? Number(((catTotal/monthTotal)*100).toFixed(2)) : 0);
+      else values.push(Number(catTotal.toFixed(2)));
+    }
+    return values;
+  }
+
+  function computePieData(months) {
+    // returns {labels:[], data:[] } for totals by category across selected months
+    const expenses = readExpenses();
+    const map = new Map();
+    const {start} = monthRangeForOffset(months-1);
+    const now = new Date();
+    for (const e of expenses) {
+      const d = e.dateObj || (e.dateStr?parseDateString(e.dateStr):null);
+      if (!d) continue;
+      if (d>=start && d<=now) {
+        const cat = (e.category||'Uncategorized').trim();
+        map.set(cat, (map.get(cat)||0) + Number(e.amount||0));
+      }
+    }
+    // sort descending for nicer pie
+    const arr = Array.from(map.entries()).sort((a,b)=> b[1]-a[1]);
+    return { labels: arr.map(x=>x[0]), data: arr.map(x=>Number(x[1].toFixed(2))) };
+  }
+
+  function renderLineChart(category, months, mode) {
+    const labels = lastNMonthsLabels(months);
+    const data = computeLineData(category, months, mode);
+    const ctx = document.getElementById('chartCanvas').getContext('2d');
+
+    if (lineChart) { try { lineChart.destroy(); } catch(e){} lineChart = null; }
+
+    const dataset = {
+      label: mode==='share' ? `${category} share (%)` : `${category} amount (₹)`,
+      data,
+      fill: true,
+      tension: 0.35,
+      borderWidth: 2,
+      borderColor: 'rgba(63,103,230,0.95)',
+      backgroundColor: 'rgba(63,103,230,0.12)',
+      pointRadius: 6,
+      pointBackgroundColor: 'rgba(63,103,230,1)',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointHoverRadius: 8
+    };
+
+    lineChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets: [dataset] },
+      options: {
+        responsive:true, maintainAspectRatio:true, aspectRatio: 3.3,
+        scales: {
+          y: {
+            beginAtZero:true,
+            ticks: {
+              callback: function(value) { return mode==='share' ? value + '%' : '₹' + value; }
+            }
+          },
+          x: {}
+        },
+        plugins: {
+          legend:{ display:false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return mode==='share' ? `${ctx.parsed.y}% of monthly spend` : `₹${ctx.parsed.y}`; }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderPieChart(months) {
+    const {labels, data} = computePieData(months);
+    const ctx = document.getElementById('pieCanvas').getContext('2d');
+    if (pieChart) { try { pieChart.destroy(); } catch(e){} pieChart = null; }
+    // generate pastel palette
+    const palette = labels.map((_,i)=> {
+      const hue = (i*47) % 360;
+      return `hsl(${hue} 80% 55%)`;
+    });
+    pieChart = new Chart(ctx, {
+      type: 'pie',
+      data: { labels, datasets: [{ data, backgroundColor: palette, borderColor:'#fff', borderWidth:2 }]},
+      options: {
+        responsive:true, maintainAspectRatio:true, aspectRatio: 3.3,
+        plugins: {
+          legend: { position:'right', labels:{ boxWidth:12, padding:6 } },
+          tooltip: { callbacks: { label: ctx => `${ctx.label}: ₹${ctx.parsed}` } }
+        }
+      }
+    });
+  }
+
+  /* ---------- main update function ---------- */
+  function updateCategoryStats() {
+    const sel = document.getElementById('categorySelect');
+    const category = (sel.value || '').trim();
+    const rangeRadios = document.querySelectorAll('input[name="range"]');
+    let months = 12; rangeRadios.forEach(r=>{ if (r.checked) months = Number(r.value); });
+
+    const lineMode = document.getElementById('lineMode').value; // 'share' or 'amount'
+    const showPie = document.getElementById('chartViewToggle').checked;
+
+    // update title
+    const titleEl = document.getElementById('chartTitle');
+    titleEl.innerText = showPie ? `Category breakdown (${months} months)` : (category ? `${category} · ${lineMode==='share' ? 'Share %' : 'Monthly amount (₹)'} (${months}m)` : 'Select a category and press Show');
+
+    // if no category selected and not showing pie, clear chart area
+    if (!category && !showPie) {
+      // hide both canvases
+      document.getElementById('chartCanvas').style.display='none';
+      document.getElementById('pieCanvas').style.display='none';
+      document.getElementById('chartTitle').innerText = 'Select a category or enable Pie view';
+      return;
+    }
+
+    // show/hide canvases based on toggle
+    if (showPie) {
+      document.getElementById('chartCanvas').style.display='none';
+      document.getElementById('pieCanvas').style.display='block';
+      renderPieChart(months);
+    } else {
+      document.getElementById('chartCanvas').style.display='block';
+      document.getElementById('pieCanvas').style.display='none';
+      renderLineChart(category, months, lineMode);
+    }
+  }
+
+  /* ---------- touch swipe to toggle view ---------- */
+  (function attachSwipe() {
+    const wrapper = document.getElementById('chartWrapper');
+    if (!wrapper) return;
+    let startX = 0, startY = 0;
+    wrapper.addEventListener('touchstart', e => {
+      const t = e.touches[0]; startX = t.clientX; startY = t.clientY;
+    }, {passive:true});
+    wrapper.addEventListener('touchend', e => {
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX; const dy = t.clientY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        // horizontal swipe
+        // toggle the chartViewToggle checkbox and refresh
+        const toggle = document.getElementById('chartViewToggle');
+        toggle.checked = !toggle.checked;
+        updateCategoryStats();
+      }
+    });
+  })();
+
+  /* ---------- init & listeners ---------- */
+  document.addEventListener('DOMContentLoaded', () => {
+    // normalize existing storage (convert stored dateObj strings)
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const arr = JSON.parse(raw);
+        const normalized = arr.map(e => {
+          const d = e.dateObj ? new Date(e.dateObj) : (e.dateStr ? parseDateString(e.dateStr) : null);
+          return {
+            id: e.id || Math.random().toString(36).slice(2),
+            amount: Number(e.amount || 0),
+            category: e.category || e.cat || '',
+            note: e.note || '',
+            dateStr: e.dateStr || (d ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}` : ''),
+            timeStr: e.timeStr || '',
+            dateObj: d
+          };
+        });
+        saveExpenses(normalized);
+      } catch (err) { console.warn('Could not normalize stored data', err); }
+    }
+
+    // controls
+    document.getElementById('chartViewToggle').addEventListener('change', updateCategoryStats);
+    document.getElementById('lineMode').addEventListener('change', updateCategoryStats);
+    document.querySelectorAll('input[name="range"]').forEach(r => r.addEventListener('change', updateCategoryStats));
+    document.getElementById('categorySelect').addEventListener('change', updateCategoryStats);
+
+    renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
+  });
+
+  window.addEventListener('storage', (ev)=> {
+    if (ev.key === STORAGE_KEY) {
+      renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
+    }
+  });
+  </script>
 </body>
 </html>
