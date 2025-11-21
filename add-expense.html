@@ -1,553 +1,609 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Add Expense</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Base UI kept the same; category panel modified to only show charts (line/pie) */
-    body{font-family:Inter,system-ui,Arial;background:#eef3fb;margin:0;padding:22px}
-    .container{max-width:960px;margin:0 auto}
-    h2{font-size:26px;margin:6px 0 12px;color:#0b2340}
-    .link{color:#2a66d9;text-decoration:underline;display:inline-block;margin-bottom:8px}
-    .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(20,30,60,0.06);margin-bottom:16px}
-    input[type="number"], input[type="text"], select{width:100%;padding:12px;border-radius:10px;border:1px solid #e6e9ef;margin:8px 0;font-size:15px}
-    button{display:inline-block;padding:10px 14px;border-radius:10px;border:0;background:#3f67e6;color:#fff;font-weight:600;font-size:14px;cursor:pointer}
-    .small-btn{background:#f0f3ff;color:#2a2f6b;padding:8px;border-radius:8px;border:0;cursor:pointer}
-    .danger-btn{background:#ffecec;color:#9a1f1f;padding:8px;border-radius:8px;border:0;cursor:pointer}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Add Expense — Expense Tracker</title>
 
-    table{width:100%;border-collapse:collapse;background:transparent;margin-top:8px}
-    th, td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee;font-size:14px}
-    th{font-weight:700}
+<!-- Chart.js (kept for charts) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    /* Highest cards */
-    .row {display:flex;gap:12px;flex-wrap:wrap}
-    .stat-card{flex:1;min-width:180px;padding:12px;border-radius:12px;background:#fff;box-shadow:0 8px 20px rgba(20,30,60,0.05)}
-    .stat-value{margin-top:8px;font-size:18px;font-weight:700}
-    .stat-meta{font-size:13px;color:#666;margin-top:6px}
+<style>
+  :root{
+    --accent:#3f67e6; --muted:#6b7280; --bg:#f5f7fb; --card:#fff; --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,Segoe UI,Arial;margin:0;background:var(--bg);color:#0b2340}
+  .wrap{max-width:1200px;margin:18px auto;padding:12px}
+  h1{margin:0 0 8px;font-size:22px}
+  a.link{color:var(--accent);text-decoration:underline}
+  input, select, textarea, button{font-family:inherit}
+  input[type=number], input[list], select, textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #e6e9ef;margin-top:8px}
+  textarea{min-height:60px}
+  .btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  .secondary{background:#eef2ff;color:#0b2340}
+  .small{color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:1fr 380px;gap:14px}
+  @media (max-width:1100px){ .grid{grid-template-columns:1fr} }
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:10px;text-align:left;border-bottom:1px solid #eee}
+  .muted{color:var(--muted);font-size:13px}
+  .kpi-row{display:flex;gap:10px;flex-wrap:wrap}
+  .kpi{background:#f9fbff;border-radius:10px;padding:12px;flex:1;min-width:160px}
+  .controls-col{display:flex;flex-direction:column;gap:10px}
+  .chart-card{display:flex;flex-direction:column;gap:12px}
+  .chart-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .chart-holder{width:520px;height:520px;background:#fff;padding:10px;border-radius:10px;box-shadow:0 6px 18px rgba(10,20,40,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .chart-title{font-weight:700;font-size:15px;margin-bottom:8px}
+  canvas.fixed520{width:520px!important;height:520px!important}
+  @media (max-width:1150px){ .chart-holder{width:48%;} canvas.fixed520{width:100%!important;height:360px!important} }
+  @media (max-width:780px){ .chart-holder{width:100%;} canvas.fixed520{width:100%!important;height:360px!important} }
 
-    /* Category Analysis: simplified to single chart area switchable between line and pie */
-    #category-panel .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
-    .controls label{font-size:14px}
-    .chart-area{background:#fff;border-radius:12px;padding:12px;box-shadow:0 10px 20px rgba(20,30,60,0.04)}
-    .chart-topline{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-    .chart-title{font-weight:700;font-size:15px;margin:6px 0}
-    .chart-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .toggle { background:#f4f6fb;border-radius:999px;padding:6px;display:inline-flex;gap:6px;align-items:center }
-    .toggle input { margin-right:6px }
+  /* Card styling: ensure consistent width on mobile */
+  .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 10px 22px rgba(20,30,60,0.06);margin-bottom:14px}
+  /* On small screens, make all cards full width so they are consistent */
+  @media (max-width:1100px){
+    .card{width:100%}
+  }
 
-    /* Chart sizing: larger (double length) and wider (1.5x width effect via aspectRatio). mobile-friendly */
-    #chartWrapper{margin-top:12px;display:flex;justify-content:center}
-    #chartCanvas { width:100% !important; height:320px !important; max-width:900px; } /* tall ~320px */
-    #pieCanvas   { width:100% !important; height:320px !important; max-width:900px; }
-
-    /* swipe hint small */
-    .swipe-hint{font-size:12px;color:#6b7280;margin-top:6px}
-
-    /* responsive fallback: stack */
-    @media (max-width:520px) {
-      body{padding:14px}
-      #chartCanvas, #pieCanvas { height:300px !important; }
-    }
-    @media (max-width:360px) {
-      #chartCanvas, #pieCanvas { height:260px !important; }
-    }
-  </style>
+  .suggest-box{padding:14px;border-radius:10px;background:linear-gradient(180deg,#f7fffa,#f0fff6);border-left:6px solid #06b6d4}
+  .suggest-title{display:flex;align-items:center;gap:10px}
+  .suggest-title .dot{width:12px;height:12px;border-radius:50%;background:#06b6d4}
+  .suggest-content{font-size:15px;line-height:1.45;color:#0b2340;margin-top:8px}
+  .suggest-tips{margin-top:8px;font-size:13px;color:var(--muted)}
+  .danger-suggest{background:linear-gradient(180deg,#fff5f5,#fff1f1);border-left:6px solid #ff6b6b}
+  .delete-row{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-bottom:6px}
+  .quick-grid{display:flex;gap:8px;flex-wrap:wrap}
+  .quick-grid button{background:#f3f6ff;border:0;padding:6px 10px;border-radius:8px;cursor:pointer}
+  .card-header{display:flex;justify-content:space-between;align-items:center}
+  .export-btn{background:#0b6e4f;color:#fff;padding:8px 10px;border-radius:8px;border:0;cursor:pointer}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>Add Expense</h2>
-    <a class="link" href="dashboard.html">← Back to Dashboard</a>
+<div class="wrap">
+  <h1>Add Expense</h1>
+  <a class="link" href="dashboard.html">← Back to Dashboard</a>
 
-    <!-- Add Expense -->
-    <div class="card">
-      <input id="amt" type="number" placeholder="Amount (₹)" min="0" step="0.01" />
-      <input id="cat" type="text" placeholder="Category (Food, Bills, Travel)" />
-      <input id="note" type="text" placeholder="Note (optional)" />
-      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
-        <button onclick="addExpense()">Save Expense</button>
-        <button class="small-btn" onclick="refreshCategoryList()">Refresh Categories</button>
-      </div>
-    </div>
+  <!-- Input card -->
+  <div class="card" style="margin-top:12px">
+    <label>Amount (₹)</label>
+    <input id="amt" type="number" placeholder="Amount" />
 
-    <!-- Highest expense cards (unchanged) -->
-    <div class="card" id="highest-stats">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <h3 style="margin:0">Highest Expenses</h3>
-      </div>
-      <div class="row" style="margin-top:12px">
-        <div class="stat-card" id="high-1m"><strong>This month</strong><div class="stat-value">—</div><div class="stat-meta"></div></div>
-        <div class="stat-card" id="high-3m"><strong>Last 3 months</strong><div class="stat-value">—</div><div class="stat-meta"></div></div>
-        <div class="stat-card" id="high-6m"><strong>Last 6 months</strong><div class="stat-value">—</div><div class="stat-meta"></div></div>
-      </div>
-    </div>
+    <label style="margin-top:8px">Category</label>
+    <!-- typeable datalist so user can type or select -->
+    <input id="cat" list="catList" placeholder="Type or select category" />
+    <datalist id="catList"></datalist>
 
-    <!-- CATEGORY ANALYSIS: only chart area visible, with toggle to switch to pie -->
-    <div class="card" id="category-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <h3 style="margin:0">Category Analysis</h3>
+    <label style="margin-top:8px">Note (optional)</label>
+    <textarea id="note" placeholder="Note (optional)"></textarea>
 
-        <!-- Delete specific category selector -->
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="deleteCategorySelect" style="min-width:160px;padding:8px;border-radius:8px;border:1px solid #e6e9ef"></select>
-          <button class="danger-btn" onclick="deleteSelectedCategory()">Delete Selected</button>
-        </div>
-      </div>
-
-      <div class="controls" style="margin-top:12px">
-        <div>
-          <label style="font-weight:600;margin-right:8px">Analyze category:</label>
-          <select id="categorySelect" style="min-width:180px;padding:8px;border-radius:8px;border:1px solid #e6e9ef"></select>
-        </div>
-
-        <div>
-          <label style="font-weight:600;margin-right:8px">Range:</label>
-          <label><input type="radio" name="range" value="3"> 3m</label>
-          <label style="margin-left:6px;"><input type="radio" name="range" value="6"> 6m</label>
-          <label style="margin-left:6px;"><input type="radio" name="range" value="12" checked> 12m</label>
-        </div>
-
-        <div>
-          <label style="font-weight:600;margin-right:8px">Chart view:</label>
-          <div class="toggle">
-            <label style="display:inline-flex;align-items:center"><input type="checkbox" id="chartViewToggle"> Show Pie</label>
-          </div>
-        </div>
-
-        <div>
-          <label style="font-weight:600;margin-right:8px">Line data:</label>
-          <select id="lineMode" style="min-width:140px;padding:6px;border-radius:8px;border:1px solid #e6e9ef">
-            <option value="share">Share %</option>
-            <option value="amount">Monthly amount (₹)</option>
-          </select>
-        </div>
-
-        <div style="margin-left:auto">
-          <button class="small-btn" onclick="updateCategoryStats()">Show</button>
-        </div>
-      </div>
-
-      <div class="chart-area" id="chartArea" style="margin-top:12px">
-        <div class="chart-topline">
-          <div class="chart-title" id="chartTitle">Category share (last 12 months)</div>
-          <div class="chart-controls">
-            <div style="font-size:13px;color:#6b7280">Swipe left/right or toggle to switch view</div>
-          </div>
-        </div>
-
-        <div id="chartWrapper" style="margin-top:8px; touch-action: pan-y;">
-          <!-- Line chart (default visible) -->
-          <canvas id="chartCanvas" style="display:block"></canvas>
-          <!-- Pie chart (hidden by default) -->
-          <canvas id="pieCanvas" style="display:none"></canvas>
-        </div>
-
-        <div class="swipe-hint">Tip: swipe the chart left/right to switch between Line & Pie on mobile</div>
-      </div>
-    </div>
-
-    <!-- Recent expenses table -->
-    <div class="card">
-      <h3 style="margin-top:0">Recent Expenses</h3>
-      <table id="expTable" aria-describedby="recent-expenses">
-        <thead>
-          <tr><th style="width:6%">Sl.</th><th style="width:36%">Category</th><th style="width:18%">Price (₹)</th><th style="width:20%">Date</th><th style="width:20%">Time</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveBtn">Save Expense</button>
+      <button id="refreshCats" class="btn secondary" style="padding:10px 12px">Refresh Categories</button>
     </div>
   </div>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Highest Expenses</h3>
+        <div class="kpi-row" id="kpis">
+          <div class="kpi">
+            <div class="small">This month</div>
+            <div style="font-weight:700;font-size:18px" id="hiThis">—</div>
+            <div class="muted" id="hiThisMeta"></div>
+          </div>
+          <div class="kpi">
+            <div class="small">Last 3 months</div>
+            <div style="font-weight:700;font-size:18px" id="hi3">—</div>
+            <div class="muted" id="hi3Meta"></div>
+          </div>
+          <div class="kpi">
+            <div class="small">Last 6 months</div>
+            <div style="font-weight:700;font-size:18px" id="hi6">—</div>
+            <div class="muted" id="hi6Meta"></div>
+          </div>
+          <div class="kpi">
+            <div class="small">Last 12 months</div>
+            <div style="font-weight:700;font-size:18px" id="hi12">—</div>
+            <div class="muted" id="hi12Meta"></div>
+          </div>
+        </div>
+      </div>
 
-  <script>
-  /*******************************
-   * Storage + helpers (same behavior)
-   *******************************/
-  const STORAGE_KEY = 'expenses';
+      <!-- RECENT EXPENSES card (moved here) -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 style="margin:0">Recent Expenses</h3>
+            <div class="small">Latest items appear at top</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="exportBtn" class="export-btn">Export CSV</button>
+          </div>
+        </div>
 
-  function nowDateTimeParts() {
-    const d = new Date();
-    return {
-      dateStr: `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`,
-      timeStr: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`,
-      dateObj: d
-    };
-  }
+        <table id="expTable">
+          <thead>
+            <tr><th>Sl.</th><th>Category</th><th>Price (₹)</th><th>Date</th><th>Time</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
-  function parseDateString(s) {
-    if (!s) return null;
-    s = s.trim();
-    if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
-      const [d,m,y] = s.split('/');
-      return new Date(Number(y), Number(m)-1, Number(d));
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:0">Category Analysis</h3>
+          <div class="delete-row">
+            <select id="deleteCategory">
+              <option value="">-- choose to delete --</option>
+            </select>
+            <button id="deleteCatBtn" style="background:#ffebe9;color:#c53030;border-radius:8px;padding:8px;border:0">Delete Selected</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap" class="controls-col">
+          <div style="flex:1;min-width:220px">
+            <div class="small">Analyze category:</div>
+            <select id="analysisCategory" style="margin-top:8px;width:100%"></select>
+
+            <div style="margin-top:10px" class="small">Range:</div>
+            <div style="margin-top:6px" class="row">
+              <label><input type="radio" name="range" value="3" checked/> 3m</label>
+              <label><input type="radio" name="range" value="6"/> 6m</label>
+              <label><input type="radio" name="range" value="12"/> 12m</label>
+            </div>
+
+            <div style="margin-top:10px" class="small">Line data:</div>
+            <select id="lineData" style="margin-top:8px;width:100%">
+              <option value="share">Share %</option>
+              <option value="amount">Monthly amount</option>
+            </select>
+
+            <div style="margin-top:10px" class="row">
+              <label style="display:flex;align-items:center;"><input id="showPie" type="checkbox" style="margin-right:6px"/> Show Pie</label>
+              <button id="showAnalysis" class="btn" style="padding:8px 10px">Show</button>
+            </div>
+          </div>
+
+          <div style="flex:1;min-width:260px">
+            <div id="suggestionsArea" class="suggest-box">
+              <div class="suggest-title">
+                <div class="dot"></div>
+                <div style="font-weight:700">Personalized Suggestions</div>
+              </div>
+              <div id="suggestText" class="suggest-content">
+                Choose a category and range then press <strong>Show</strong>. Suggestions will appear here.
+              </div>
+              <div class="suggest-tips" id="suggestTips">
+                Tip: If a category is >30% of your total spending consider creating a monthly cap for it.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Category breakdown (quick links)</h3>
+        <div class="small">Click to analyze quickly</div>
+        <div style="margin-top:10px" id="quickCats" class="quick-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Separate chart card (kept swipeable and not changed) -->
+  <div class="card chart-card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:700">Charts — big view</div>
+      <div class="small">Swipe left/right or toggle to switch view on mobile</div>
+    </div>
+
+    <div class="chart-row" style="margin-top:12px;justify-content:center">
+      <div class="chart-holder">
+        <div class="chart-title" id="chartTitle">Category share (last 3 mo)</div>
+        <canvas id="lineChart" class="fixed520" width="520" height="520"></canvas>
+      </div>
+
+      <div class="chart-holder">
+        <div class="chart-title" id="barTitle">Totals by category (last 3 mo)</div>
+        <canvas id="barChart" class="fixed520" width="520" height="520"></canvas>
+        <canvas id="pieChart" class="fixed520" width="520" height="520" style="display:none"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ----------------- Utilities & storage ----------------- */
+const EXP_KEY = 'expenses';
+function loadExpenses(){ try{ const r = localStorage.getItem(EXP_KEY); return r ? JSON.parse(r) : []; } catch(e){ return []; } }
+function saveExpenses(arr){ try{ localStorage.setItem(EXP_KEY, JSON.stringify(arr)); } catch(e){ console.error('Unable to save expenses', e); alert('Unable to save - localStorage error'); } }
+function addExpenseObj(obj){ const arr = loadExpenses(); arr.unshift(obj); saveExpenses(arr); }
+
+/* formatting helpers */
+function formatDateISO(dISO){ const dt = new Date(dISO); if(isNaN(dt)) return { date:'Invalid Date', time:'Invalid Date' }; return { date: dt.toLocaleDateString('en-GB'), time: dt.toLocaleTimeString('en-GB') }; }
+function monthDiff(d1,d2){ const y1=d1.getFullYear(), m1=d1.getMonth(); const y2=d2.getFullYear(), m2=d2.getMonth(); return (y2-y1)*12 + (m2-m1); }
+
+/* default categories */
+const defaultCats = ["Food","Rent","Travel","Vehicle loan","home loan","Education","Entertainment","Miscellaneous"];
+
+/* get categories aggregated */
+function getCategories(){
+  const arr = loadExpenses();
+  const set = new Set(defaultCats);
+  arr.forEach(e=> set.add(e.category));
+  return Array.from(set);
+}
+
+/* populate datalist + selects + quick links */
+function populateCategorySelects(){
+  const sel = document.getElementById('analysisCategory');
+  const del = document.getElementById('deleteCategory');
+  const quick = document.getElementById('quickCats');
+  const dataList = document.getElementById('catList');
+  const catInput = document.getElementById('cat');
+
+  sel.innerHTML = ''; del.innerHTML = '<option value="">-- choose to delete --</option>'; quick.innerHTML = ''; dataList.innerHTML='';
+
+  const allOpt = document.createElement('option');
+  allOpt.value = '__ALL__'; allOpt.innerText = 'Analyze: All categories';
+  sel.appendChild(allOpt);
+
+  getCategories().forEach(c=>{
+    const o = document.createElement('option'); o.value=c; o.innerText=c; sel.appendChild(o);
+    const od = document.createElement('option'); od.value=c; od.innerText=c; del.appendChild(od);
+    const dopt = document.createElement('option'); dopt.value = c; dataList.appendChild(dopt);
+    const btn = document.createElement('button'); btn.innerText = c;
+    btn.style.padding='6px 10px'; btn.style.borderRadius='8px'; btn.style.border='0'; btn.style.cursor='pointer';
+    btn.onclick = ()=>{ document.getElementById('analysisCategory').value = c; document.querySelector('input[name=range][value=3]').checked=true; runAnalysis(); }
+    quick.appendChild(btn);
+  });
+
+  if(!catInput.value) catInput.value = getCategories()[0] || '';
+}
+
+/* ----------------- Render recent ----------------- */
+function renderRecent(){
+  const tbody = document.querySelector('#expTable tbody'); tbody.innerHTML='';
+  const ex = loadExpenses();
+  ex.slice(0,200).forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    const dt = formatDateISO(r.dateISO);
+    tr.innerHTML = `<td>${i+1}</td><td>${r.category}</td><td>₹${r.amount.toLocaleString()}</td><td>${dt.date}</td><td>${dt.time}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ----------------- KPIs ----------------- */
+function highestInRange(months){
+  const ex = loadExpenses();
+  const now = new Date();
+  let best = null;
+  ex.forEach(e=>{
+    const d = new Date(e.dateISO);
+    const diff = monthDiff(d, now);
+    if(diff <= months-1 && diff >= 0){
+      if(!best || e.amount > best.amount) best = e;
     }
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d;
+  });
+  return best;
+}
+function computeKpis(){
+  const hiThis = highestInRange(1), hi3 = highestInRange(3), hi6 = highestInRange(6), hi12 = highestInRange(12);
+  function fill(a,b,o){
+    if(!o){ a.innerText='—'; b.innerText=''; return; }
+    a.innerText = '₹' + o.amount.toLocaleString();
+    const dt = formatDateISO(o.dateISO); b.innerText = `${o.category} • ${dt.date} • ${dt.time}`;
   }
+  fill(document.getElementById('hiThis'), document.getElementById('hiThisMeta'), hiThis);
+  fill(document.getElementById('hi3'), document.getElementById('hi3Meta'), hi3);
+  fill(document.getElementById('hi6'), document.getElementById('hi6Meta'), hi6);
+  fill(document.getElementById('hi12'), document.getElementById('hi12Meta'), hi12);
+}
 
-  function readExpenses() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const arr = JSON.parse(raw);
-      return arr.map(e => {
-        const amount = Number(e.amount || e.amt || e.price || 0);
-        const dateObj = e.dateObj ? new Date(e.dateObj) : (e.dateStr ? parseDateString(e.dateStr) : null);
-        return {
-          id: e.id || (Math.random().toString(36).slice(2)),
-          amount,
-          category: (e.category || e.cat || '').toString(),
-          note: e.note || '',
-          dateStr: e.dateStr || '',
-          timeStr: e.timeStr || '',
-          dateObj
-        };
-      });
-    } catch (err) {
-      console.warn('Error reading expenses', err);
-      return [];
+/* ----------------- Delete category ----------------- */
+document.getElementById('deleteCatBtn').addEventListener('click', ()=>{
+  const c = document.getElementById('deleteCategory').value;
+  if(!c){ alert('Choose a category to delete'); return; }
+  if(!confirm(`Delete ALL expenses in category "${c}"? This cannot be undone.`)) return;
+  const ex = loadExpenses().filter(x=>x.category !== c);
+  saveExpenses(ex);
+  populateCategorySelects();
+  renderRecent();
+  computeKpis();
+  runAnalysis();
+});
+
+/* ----------------- Chart utilities (kept as before) ----------------- */
+let lineChart = null, barChart = null, pieChart = null;
+
+function monthlyBuckets(rangeMonths){
+  const now = new Date();
+  const res = [];
+  for(let i=rangeMonths-1;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const label = d.toLocaleString('en-GB',{month:'short',year:'2-digit'});
+    res.push({ label, date: d, total:0, byCategory: {} });
+  }
+  const ex = loadExpenses();
+  ex.forEach(e=>{
+    const ed = new Date(e.dateISO);
+    const diff = monthDiff(ed, now);
+    if(diff <= (rangeMonths-1) && diff >= 0){
+      const index = rangeMonths-1 - diff;
+      res[index].total += e.amount;
+      res[index].byCategory[e.category] = (res[index].byCategory[e.category] || 0) + e.amount;
     }
+  });
+  return res;
+}
+
+/* suggestions */
+const suggestionsPool = {
+  'Food': ['Limit outside-food orders to 2/week, meal-prep twice per week and set a weekly food cap.','Track "food outside" separately to see exact leak points.'],
+  'Rent': ['For rent/EMI, ensure an emergency buffer and consider refinancing for loans.','If rent >40% of net income, re-evaluate your budget or housing option.'],
+  'Travel': ['Combine trips, use public transport or monthly passes, or carpool to reduce commute cost.','Consider tracking fuel vs other travel costs separately.'],
+  'Vehicle loan': ['Refinancing the loan for a lower rate or longer tenure can reduce monthly EMI.','If possible, prepay small amounts to reduce interest burden.'],
+  'home loan': ['Check EMI refinancing and tax benefits. If EMIs crowd the budget, consider restructuring.','Keep an emergency buffer of 3-6 months for loans.'],
+  'Education': ['Look for scholarships, instalment plans or open-source/free resources to reduce costs.','Plan education expenses across months rather than lumpsums.'],
+  'Entertainment': ['Audit subscriptions and cancel unused ones. Set a monthly entertainment allowance.','Use free alternatives and limit impulse purchases.'],
+  'Miscellaneous': ['Group small misc purchases weekly and review if they are recurring.','Create a separate petty-cash budget for small purchases.']
+};
+
+function computeSuggestionsAll(ag){
+  const entries = Object.entries(ag).sort((a,b)=>b[1]-a[1]);
+  const total = entries.reduce((s,e)=>s+e[1],0)||1;
+  const top = entries.slice(0,3).map(([k,v])=> `${k}: ${Math.round((v/total)*10000)/100}%`).join(' • ');
+  const area = document.getElementById('suggestText');
+  const tips = document.getElementById('suggestTips');
+  area.innerHTML = `<div style="font-size:16px;font-weight:600">Top categories in this period</div><div style="margin-top:6px">${top || 'No data'}</div>`;
+  tips.innerHTML = `Tips: If a single category is >30% consider setting a monthly cap for it. Prioritize reviewing the top category first.`;
+}
+
+function computeSuggestions(cat, range, metric, buckets, catSeries, totalSeries){
+  const totalSum = totalSeries.reduce((a,b)=>a+b,0);
+  const catSum = catSeries.reduce((a,b)=>a+b,0);
+  const sharePct = totalSum ? Math.round((catSum/totalSum)*10000)/100 : 0;
+  const pool = suggestionsPool[cat] || ['Monitor this category regularly; small recurring costs add up.'];
+  let suggestion = `This category accounts for ${sharePct}% of spending in the selected period.`;
+  if(sharePct >= 40) suggestion = `⚠️ High spending on ${cat} — ${pool[0]}`;
+  else if(sharePct >= 25) suggestion = `Notice: ${cat} is ${sharePct}% of your spending. ${pool[0]}`;
+  else if(sharePct >= 10) suggestion = `Moderate spending on ${cat} (${sharePct}%). ${pool[1] || pool[0]}`;
+  else suggestion = `Good — ${cat} makes up only ${sharePct}% of spending. Keep tracking.`;
+
+  const avgMonthly = range ? Math.round(catSum / range) : 0;
+  if(cat === 'Food' && avgMonthly > 10000){
+    suggestion += ` Tip: average monthly Food = ₹${avgMonthly.toLocaleString()}. Try cooking more at home.`;
   }
 
-  function saveExpenses(arr) {
-    const safe = arr.map(e => ({
-      id: e.id,
-      amount: e.amount,
-      category: e.category,
-      note: e.note,
-      dateStr: e.dateStr,
-      timeStr: e.timeStr,
-      dateObj: e.dateObj ? e.dateObj.toISOString() : null
-    }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
-    window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue: JSON.stringify(safe) }));
-  }
+  const sugArea = document.getElementById('suggestText'), tips = document.getElementById('suggestTips');
+  if(sharePct >= 35) document.getElementById('suggestionsArea').className = 'suggest-box danger-suggest';
+  else document.getElementById('suggestionsArea').className = 'suggest-box';
+  sugArea.innerHTML = `<div style="font-size:16px;font-weight:600">${suggestion}</div><div style="margin-top:8px">${pool[0]}</div>`;
+  tips.innerHTML = `Actionable: 1) Set a target cap for ${cat}. 2) Track 2 weeks of receipts to identify leaking sub-items. 3) Re-evaluate subscriptions related to ${cat}.`;
+}
 
-  /* ---------- table rendering ---------- */
-  function escapeHtml(s) {
-    if (!s) return '';
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-  function formatDate(d) {
-    if (!d) return '';
-    const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = d.getFullYear();
-    return `${dd}/${mm}/${yy}`;
-  }
+/* ----------------- Analysis & Charts (runAnalysis) ----------------- */
+function runAnalysis(){
+  const selVal = document.getElementById('analysisCategory').value;
+  const isAll = selVal === '__ALL__';
+  const range = Number(document.querySelector('input[name=range]:checked').value);
+  const lineMetric = document.getElementById('lineData').value;
+  const showPie = document.getElementById('showPie').checked;
+  const buckets = monthlyBuckets(range);
+  const labels = buckets.map(b=>b.label);
+  const totalSeries = buckets.map(b=>b.total || 0);
 
-  function renderTable() {
-    const tbody = document.querySelector('#expTable tbody');
-    tbody.innerHTML = '';
-    const arr = readExpenses().sort((a,b)=> (b.dateObj?b.dateObj.getTime():0) - (a.dateObj?a.dateObj.getTime():0));
-    if (!arr.length) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="5" style="text-align:center;padding:16px;color:#666">No expenses yet</td>';
-      tbody.appendChild(tr); return;
-    }
-    for (let i=0;i<arr.length;i++){
-      const e = arr[i];
-      const tr = document.createElement('tr');
-      const priceText = '₹' + (Number(e.amount)%1===0 ? e.amount.toString() : Number(e.amount).toFixed(2));
-      const dateText = e.dateStr || (e.dateObj?formatDate(e.dateObj):'');
-      const timeText = e.timeStr || '';
-      tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(e.category)}</td><td>${priceText}</td><td>${dateText}</td><td>${timeText}</td>`;
-      tbody.appendChild(tr);
-    }
-  }
+  const aggregatePerCategory = {};
+  buckets.forEach(b=>{
+    for(const k in b.byCategory){ aggregatePerCategory[k] = (aggregatePerCategory[k]||0) + b.byCategory[k]; }
+  });
 
-  /* ---------- add expense ---------- */
-  function addExpense() {
-    const amtEl = document.getElementById('amt'), catEl = document.getElementById('cat'), noteEl = document.getElementById('note');
-    const amount = Number(amtEl.value), category = (catEl.value||'').trim(), note = (noteEl.value||'').trim();
-    if (!category) { alert('Please enter a category'); return; }
-    if (!amount || amount <= 0) { alert('Please enter a valid amount'); return; }
-    const parts = nowDateTimeParts();
-    const e = { id: Math.random().toString(36).slice(2), amount, category, note, dateStr: parts.dateStr, timeStr: parts.timeStr, dateObj: parts.dateObj };
-    const arr = readExpenses(); arr.push(e); saveExpenses(arr);
-    amtEl.value=''; catEl.value=''; noteEl.value='';
-    renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
-  }
+  if(lineChart){ lineChart.destroy(); lineChart = null; }
+  if(barChart){ barChart.destroy(); barChart = null; }
+  if(pieChart){ pieChart.destroy(); pieChart = null; }
 
-  /* ---------- highest cards ---------- */
-  function rangeStartDateForMonths(months) {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth() - (months - 1), 1, 0, 0, 0);
-  }
-  function highestExpenseWithinMonths(months) {
-    const expenses = readExpenses(); if (!expenses.length) return null;
-    const now = new Date(); const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1, 0,0,0);
-    let max = null;
-    for (const e of expenses) {
-      const d = e.dateObj || (e.dateStr ? parseDateString(e.dateStr): null);
-      if (!d) continue;
-      if (d >= start && d <= now) { if (!max || Number(e.amount) > Number(max.amount)) max = e; }
-    }
-    return max;
-  }
-  function formatDateTimeForMeta(e) {
-    if (!e) return ''; const d = e.dateObj || (e.dateStr ? parseDateString(e.dateStr) : null); const datePart = d ? formatDate(d) : (e.dateStr||'');
-    return [e.category||'', datePart, e.timeStr||''].filter(Boolean).join(' · ');
-  }
-  function updateHighestCards() {
-    const config = [{id:'high-1m',months:1},{id:'high-3m',months:3},{id:'high-6m',months:6}];
-    for (const c of config) {
-      const container = document.getElementById(c.id);
-      if (!container) continue;
-      const valueEl = container.querySelector('.stat-value'); const metaEl = container.querySelector('.stat-meta');
-      const res = highestExpenseWithinMonths(c.months);
-      if (!res) { valueEl.innerText='—'; metaEl.innerText='No data'; } else {
-        const amountStr = (Number(res.amount)%1===0) ? res.amount.toString() : Number(res.amount).toFixed(2);
-        valueEl.innerText = '₹' + amountStr; metaEl.innerText = formatDateTimeForMeta(res);
-      }
-    }
-  }
+  if(isAll){
+    const cats = Object.keys(aggregatePerCategory).length ? Object.keys(aggregatePerCategory) : getCategories();
+    const colors = ['#ef4444','#f97316','#facc15','#4ade80','#60a5fa','#a78bfa','#f472b6','#9ca3af','#7c3aed','#0ea5a0'];
+    const datasets = cats.map((cat, idx)=>{
+      const series = buckets.map(b => b.byCategory[cat] || 0);
+      const data = (lineMetric==='share') ? series.map((v,i)=> totalSeries[i] ? Math.round((v/totalSeries[i])*10000)/100 : 0) : series;
+      return { label:cat, data, borderColor: colors[idx%colors.length], backgroundColor:'rgba(0,0,0,0)', tension:0.35, pointRadius:3 };
+    });
 
-  /* ---------- category helpers ---------- */
-  function sumTotal(expenses) { return expenses.reduce((s,e)=>s + (Number(e.amount)||0), 0); }
-  function filterByMonthRange(expenses, months) {
-    const now = new Date(); const start = rangeStartDateForMonths(months);
-    return expenses.filter(e => { const d = e.dateObj || (e.dateStr?parseDateString(e.dateStr):null); return d && d>=start && d<=now; });
-  }
-
-  /* ---------- category lists (analysis + delete) ---------- */
-  function refreshCategoryList() {
-    const sel = document.getElementById('categorySelect');
-    const del = document.getElementById('deleteCategorySelect');
-    const expenses = readExpenses();
-    const set = new Set();
-    for (const e of expenses) if (e.category && e.category.trim()) set.add(e.category.trim());
-    const arr = Array.from(set).sort((a,b)=>a.localeCompare(b));
-    const cur = sel.value, curDel = del.value;
-    sel.innerHTML = '<option value="">-- choose category --</option>';
-    del.innerHTML = '<option value="">-- choose to delete --</option>';
-    arr.forEach(c => { const o = document.createElement('option'); o.value=c; o.text=c; sel.appendChild(o); const p = document.createElement('option'); p.value=c; p.text=c; del.appendChild(p); });
-    if (cur) sel.value = cur; if (curDel) del.value = curDel;
-  }
-
-  /* ---------- delete specific category ---------- */
-  function deleteSelectedCategory() {
-    const del = document.getElementById('deleteCategorySelect');
-    const category = (del.value||'').trim();
-    if (!category) { alert('Choose category to delete'); return; }
-    if (!confirm(`Delete ALL expenses in category "${category}"? This cannot be undone.`)) return;
-    const expenses = readExpenses(); const remaining = expenses.filter(e => !(e.category && e.category.toLowerCase()===category.toLowerCase()));
-    saveExpenses(remaining); renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
-    alert(`Deleted category "${category}"`);
-  }
-
-  /* ---------- Chart logic: line (share% or amount) and pie ---------- */
-  let lineChart = null, pieChart = null;
-  function lastNMonthsLabels(n) {
-    const labels=[]; const now = new Date();
-    for (let i=n-1;i>=0;i--){ const d = new Date(now.getFullYear(), now.getMonth()-i,1); const mm = d.toLocaleString('default',{month:'short'}); const yy = String(d.getFullYear()).slice(2); labels.push(`${mm} '${yy}`); }
-    return labels;
-  }
-  function monthRangeForOffset(offsetFromNow) {
-    const now = new Date(); const start = new Date(now.getFullYear(), now.getMonth()-offsetFromNow,1,0,0,0); const end = new Date(start.getFullYear(), start.getMonth()+1,1,0,0,-1); return {start,end};
-  }
-
-  function computeLineData(category, months, mode) {
-    // mode: 'share' -> percent; 'amount' -> monthly category amount
-    const expenses = readExpenses(); const values=[];
-    for (let offset=months-1; offset>=0; offset--) {
-      const {start,end} = monthRangeForOffset(offset);
-      let monthTotal=0, catTotal=0;
-      for (const e of expenses) {
-        const d = e.dateObj || (e.dateStr?parseDateString(e.dateStr):null);
-        if (!d) continue;
-        if (d>=start && d<=end) { monthTotal += Number(e.amount||0); if (category && e.category && e.category.toLowerCase()===category.toLowerCase()) catTotal += Number(e.amount||0); }
-      }
-      if (mode==='share') values.push(monthTotal>0 ? Number(((catTotal/monthTotal)*100).toFixed(2)) : 0);
-      else values.push(Number(catTotal.toFixed(2)));
-    }
-    return values;
-  }
-
-  function computePieData(months) {
-    // returns {labels:[], data:[] } for totals by category across selected months
-    const expenses = readExpenses();
-    const map = new Map();
-    const {start} = monthRangeForOffset(months-1);
-    const now = new Date();
-    for (const e of expenses) {
-      const d = e.dateObj || (e.dateStr?parseDateString(e.dateStr):null);
-      if (!d) continue;
-      if (d>=start && d<=now) {
-        const cat = (e.category||'Uncategorized').trim();
-        map.set(cat, (map.get(cat)||0) + Number(e.amount||0));
-      }
-    }
-    // sort descending for nicer pie
-    const arr = Array.from(map.entries()).sort((a,b)=> b[1]-a[1]);
-    return { labels: arr.map(x=>x[0]), data: arr.map(x=>Number(x[1].toFixed(2))) };
-  }
-
-  function renderLineChart(category, months, mode) {
-    const labels = lastNMonthsLabels(months);
-    const data = computeLineData(category, months, mode);
-    const ctx = document.getElementById('chartCanvas').getContext('2d');
-
-    if (lineChart) { try { lineChart.destroy(); } catch(e){} lineChart = null; }
-
-    const dataset = {
-      label: mode==='share' ? `${category} share (%)` : `${category} amount (₹)`,
-      data,
-      fill: true,
-      tension: 0.35,
-      borderWidth: 2,
-      borderColor: 'rgba(63,103,230,0.95)',
-      backgroundColor: 'rgba(63,103,230,0.12)',
-      pointRadius: 6,
-      pointBackgroundColor: 'rgba(63,103,230,1)',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2,
-      pointHoverRadius: 8
-    };
-
-    lineChart = new Chart(ctx, {
-      type: 'line',
-      data: { labels, datasets: [dataset] },
-      options: {
-        responsive:true, maintainAspectRatio:true, aspectRatio: 3.3,
-        scales: {
-          y: {
-            beginAtZero:true,
-            ticks: {
-              callback: function(value) { return mode==='share' ? value + '%' : '₹' + value; }
-            }
-          },
-          x: {}
-        },
-        plugins: {
-          legend:{ display:false },
-          tooltip: {
-            callbacks: {
-              label: function(ctx) { return mode==='share' ? `${ctx.parsed.y}% of monthly spend` : `₹${ctx.parsed.y}`; }
-            }
-          }
-        }
+    const ctxL = document.getElementById('lineChart').getContext('2d');
+    lineChart = new Chart(ctxL, {
+      type:'line',
+      data:{ labels, datasets },
+      options:{ responsive:true, maintainAspectRatio:false,
+        scales:{ y:{ beginAtZero:true, ticks:{ callback: v => lineMetric==='share' ? v+'%' : '₹'+v } } },
+        plugins:{ legend:{ position:'bottom', labels:{boxWidth:12} } }
       }
     });
+
+    const pLabels = Object.keys(aggregatePerCategory), pData = pLabels.map(k=>aggregatePerCategory[k]);
+    document.getElementById('barChart').style.display = showPie ? 'none' : '';
+    document.getElementById('pieChart').style.display = showPie ? '' : 'none';
+    const palette = ['#ef4444','#f97316','#facc15','#4ade80','#60a5fa','#a78bfa','#f472b6','#9caaf','#7c3aed','#0ea5a0'];
+
+    if(showPie){
+      const ctxP = document.getElementById('pieChart').getContext('2d');
+      pieChart = new Chart(ctxP, { type:'pie', data:{ labels:pLabels, datasets:[{ data:pData, backgroundColor: palette.slice(0,pLabels.length) }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right'}} }});
+    } else {
+      const ctxB = document.getElementById('barChart').getContext('2d');
+      barChart = new Chart(ctxB, { type:'bar', data:{ labels:pLabels, datasets:[{ label:'Total', data:pData, backgroundColor: palette.slice(0,pLabels.length) }] }, options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v => '₹'+v } } }, plugins:{ legend:{ display:false } } }});
+    }
+
+    document.getElementById('chartTitle').innerText = `All categories — ${lineMetric==='share'?'Share %':'Monthly amount'} (${range}m)`;
+    document.getElementById('barTitle').innerText = `Totals by category (last ${range} months)`;
+    computeSuggestionsAll(aggregatePerCategory);
+    return;
   }
 
-  function renderPieChart(months) {
-    const {labels, data} = computePieData(months);
-    const ctx = document.getElementById('pieCanvas').getContext('2d');
-    if (pieChart) { try { pieChart.destroy(); } catch(e){} pieChart = null; }
-    // generate pastel palette
-    const palette = labels.map((_,i)=> {
-      const hue = (i*47) % 360;
-      return `hsl(${hue} 80% 55%)`;
+  // single category
+  const cat = selVal;
+  const catSeries = buckets.map(b => b.byCategory[cat] || 0);
+  const displaySeries = lineMetric === 'share' ? catSeries.map((v,i)=> totalSeries[i] ? Math.round((v/totalSeries[i])*10000)/100 : 0) : catSeries;
+
+  const ctxL = document.getElementById('lineChart').getContext('2d');
+  lineChart = new Chart(ctxL, {
+    type:'line',
+    data:{ labels, datasets:[{ label: (lineMetric==='share'?'% share':'Amount'), data: displaySeries, fill:true, tension:0.35, pointRadius:4, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)'}] },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v => lineMetric==='share' ? v+'%' : '₹'+v } } }, plugins:{ legend:{ display:false } } }
+  });
+
+  document.getElementById('barChart').style.display = showPie ? 'none' : '';
+  document.getElementById('pieChart').style.display = showPie ? '' : 'none';
+
+  if(!showPie){
+    const ctxB = document.getElementById('barChart').getContext('2d');
+    barChart = new Chart(ctxB, {
+      type:'bar',
+      data:{ labels, datasets:[ { label: cat, data: catSeries, backgroundColor:'rgba(79,70,229,0.9)' }, { label:'Total', data: totalSeries, backgroundColor:'rgba(203,213,225,0.9)' } ] },
+      options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v => '₹'+v } } }, plugins:{ legend:{ position:'bottom' } } }
     });
-    pieChart = new Chart(ctx, {
-      type: 'pie',
-      data: { labels, datasets: [{ data, backgroundColor: palette, borderColor:'#fff', borderWidth:2 }]},
-      options: {
-        responsive:true, maintainAspectRatio:true, aspectRatio: 3.3,
-        plugins: {
-          legend: { position:'right', labels:{ boxWidth:12, padding:6 } },
-          tooltip: { callbacks: { label: ctx => `${ctx.label}: ₹${ctx.parsed}` } }
-        }
-      }
-    });
+  } else {
+    const ag = {};
+    buckets.forEach(b=>{ for(const k in b.byCategory){ ag[k] = (ag[k]||0) + b.byCategory[k]; }});
+    const pLabels = Object.keys(ag), pData = pLabels.map(k=>ag[k]);
+    const palette = ['#ef4444','#f97316','#facc15','#4ade80','#60a5fa','#a78bfa','#f472b6','#9caaf','#7c3aed','#0ea5a0'];
+    const ctxP = document.getElementById('pieChart').getContext('2d');
+    pieChart = new Chart(ctxP, { type:'pie', data:{ labels:pLabels, datasets:[{ data:pData, backgroundColor: palette.slice(0,pLabels.length) }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right'}}}});
   }
 
-  /* ---------- main update function ---------- */
-  function updateCategoryStats() {
-    const sel = document.getElementById('categorySelect');
-    const category = (sel.value || '').trim();
-    const rangeRadios = document.querySelectorAll('input[name="range"]');
-    let months = 12; rangeRadios.forEach(r=>{ if (r.checked) months = Number(r.value); });
+  computeSuggestions(cat, range, lineMetric, buckets, catSeries, totalSeries);
+  document.getElementById('chartTitle').innerText = `${cat} — ${lineMetric==='share'?'Share %':'Monthly amount'} (${range}m)`;
+  document.getElementById('barTitle').innerText = `Monthly amounts (last ${range} months)`;
+}
 
-    const lineMode = document.getElementById('lineMode').value; // 'share' or 'amount'
-    const showPie = document.getElementById('chartViewToggle').checked;
-
-    // update title
-    const titleEl = document.getElementById('chartTitle');
-    titleEl.innerText = showPie ? `Category breakdown (${months} months)` : (category ? `${category} · ${lineMode==='share' ? 'Share %' : 'Monthly amount (₹)'} (${months}m)` : 'Select a category and press Show');
-
-    // if no category selected and not showing pie, clear chart area
-    if (!category && !showPie) {
-      // hide both canvases
-      document.getElementById('chartCanvas').style.display='none';
-      document.getElementById('pieCanvas').style.display='none';
-      document.getElementById('chartTitle').innerText = 'Select a category or enable Pie view';
+/* ----------------- Save handler (robust) ----------------- */
+document.getElementById('saveBtn').addEventListener('click', function saveHandler(){
+  try{
+    const amtEl = document.getElementById('amt');
+    const catEl = document.getElementById('cat');
+    const noteEl = document.getElementById('note');
+    if(!amtEl || !catEl || !noteEl){
+      console.error('Save: expected elements not found (ids: amt, cat, note).');
+      alert('Internal error: form fields missing (check console).');
       return;
     }
 
-    // show/hide canvases based on toggle
-    if (showPie) {
-      document.getElementById('chartCanvas').style.display='none';
-      document.getElementById('pieCanvas').style.display='block';
-      renderPieChart(months);
-    } else {
-      document.getElementById('chartCanvas').style.display='block';
-      document.getElementById('pieCanvas').style.display='none';
-      renderLineChart(category, months, lineMode);
+    const rawAmt = amtEl.value;
+    const amount = rawAmt === '' ? NaN : Number(rawAmt);
+    const category = (catEl.value || '').trim();
+    const note = (noteEl.value || '').trim();
+
+    if(Number.isNaN(amount) || amount <= 0){
+      alert('Enter a valid amount greater than 0.');
+      amtEl.focus();
+      return;
     }
+    if(!category){
+      alert('Please enter or select a category.');
+      catEl.focus();
+      return;
+    }
+
+    const expense = { amount: Math.round(amount), category, note, dateISO: new Date().toISOString() };
+
+    // load, push front, save
+    let arr = [];
+    try{
+      const raw = localStorage.getItem(EXP_KEY);
+      arr = raw ? JSON.parse(raw) : [];
+      if(!Array.isArray(arr)) arr = [];
+    }catch(e){ arr = []; console.warn('Parsing existing expenses failed - starting new array', e); }
+
+    arr.unshift(expense);
+    saveExpenses(arr);
+
+    // clear inputs
+    amtEl.value = '';
+    noteEl.value = '';
+
+    // refresh UI
+    populateCategorySelects();
+    renderRecent();
+    computeKpis();
+    runAnalysis();
+
+    alert('Saved successfully');
+    console.log('Saved expense', expense);
+  }catch(err){
+    console.error('Save failed', err);
+    alert('Save failed — see console for details.');
+  }
+});
+
+/* refresh categories button */
+document.getElementById('refreshCats').addEventListener('click', ()=>{
+  populateCategorySelects();
+});
+
+/* show analysis & pie toggle */
+document.getElementById('showAnalysis').addEventListener('click', runAnalysis);
+document.getElementById('showPie').addEventListener('change', runAnalysis);
+
+/* ----------------- Export CSV ----------------- */
+function csvEscape(v){
+  if(v==null) return '';
+  const s = String(v);
+  if(s.indexOf(',')>=0 || s.indexOf('"')>=0 || s.indexOf('\n')>=0) return `"${s.replace(/"/g,'""')}"`;
+  return s;
+}
+function exportCSV(){
+  const rows = loadExpenses();
+  if(!rows || rows.length===0){ alert('No expenses to export'); return; }
+  const header = ['Sl','Category','Amount','Date','Time','Note','iso'];
+  const lines = [ header.join(',') ];
+  rows.forEach((r,i)=>{
+    const dt = formatDateISO(r.dateISO);
+    const line = [i+1, r.category, r.amount, dt.date, dt.time, r.note || '', r.dateISO || ''];
+    lines.push(line.map(csvEscape).join(','));
+  });
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const now = new Date();
+  const fname = `expenses-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.csv`;
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = fname;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+document.getElementById('exportBtn').addEventListener('click', exportCSV);
+
+/* ----------------- Initialization & optional sample seed ----------------- */
+function initial(){
+  populateCategorySelects();
+  renderRecent();
+  computeKpis();
+
+  // seed minimal sample data only if empty (safe to remove)
+  const ex = loadExpenses();
+  if(ex.length === 0){
+    const now = new Date();
+    const sample = [
+      { amount: 500, category:'Miscellaneous', note:'sample', dateISO: new Date(now.getFullYear(), now.getMonth(), 21,16,47).toISOString() },
+      { amount: 200, category:'Food', note:'sample', dateISO: new Date(now.getFullYear(), now.getMonth(), 21,16,38).toISOString() }
+    ];
+    saveExpenses(sample);
+    populateCategorySelects();
+    renderRecent();
+    computeKpis();
   }
 
-  /* ---------- touch swipe to toggle view ---------- */
-  (function attachSwipe() {
-    const wrapper = document.getElementById('chartWrapper');
-    if (!wrapper) return;
-    let startX = 0, startY = 0;
-    wrapper.addEventListener('touchstart', e => {
-      const t = e.touches[0]; startX = t.clientX; startY = t.clientY;
-    }, {passive:true});
-    wrapper.addEventListener('touchend', e => {
-      if (!e.changedTouches || !e.changedTouches[0]) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - startX; const dy = t.clientY - startY;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        // horizontal swipe
-        // toggle the chartViewToggle checkbox and refresh
-        const toggle = document.getElementById('chartViewToggle');
-        toggle.checked = !toggle.checked;
-        updateCategoryStats();
-      }
-    });
-  })();
+  document.getElementById('analysisCategory').value = '__ALL__';
+  runAnalysis();
+}
 
-  /* ---------- init & listeners ---------- */
-  document.addEventListener('DOMContentLoaded', () => {
-    // normalize existing storage (convert stored dateObj strings)
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const arr = JSON.parse(raw);
-        const normalized = arr.map(e => {
-          const d = e.dateObj ? new Date(e.dateObj) : (e.dateStr ? parseDateString(e.dateStr) : null);
-          return {
-            id: e.id || Math.random().toString(36).slice(2),
-            amount: Number(e.amount || 0),
-            category: e.category || e.cat || '',
-            note: e.note || '',
-            dateStr: e.dateStr || (d ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}` : ''),
-            timeStr: e.timeStr || '',
-            dateObj: d
-          };
-        });
-        saveExpenses(normalized);
-      } catch (err) { console.warn('Could not normalize stored data', err); }
-    }
-
-    // controls
-    document.getElementById('chartViewToggle').addEventListener('change', updateCategoryStats);
-    document.getElementById('lineMode').addEventListener('change', updateCategoryStats);
-    document.querySelectorAll('input[name="range"]').forEach(r => r.addEventListener('change', updateCategoryStats));
-    document.getElementById('categorySelect').addEventListener('change', updateCategoryStats);
-
-    renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
-  });
-
-  window.addEventListener('storage', (ev)=> {
-    if (ev.key === STORAGE_KEY) {
-      renderTable(); updateHighestCards(); refreshCategoryList(); updateCategoryStats();
-    }
-  });
-  </script>
+initial();
+</script>
 </body>
 </html>
